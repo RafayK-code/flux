@@ -19,7 +19,6 @@ file(GLOB_RECURSE FLUX_SRC_FILES
 if(${FLUX_BUILD_SHARED})
     add_library(${PROJECT_NAME} SHARED ${FLUX_SRC_FILES})
     target_compile_definitions(${PROJECT_NAME} PUBLIC FLUX_BUILD_SHARED)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE FLUX_EXPORT)
 else()
     add_library(${PROJECT_NAME} STATIC ${FLUX_SRC_FILES})
     target_compile_definitions(${PROJECT_NAME} PUBLIC FLUX_BUILD_STATIC)
@@ -46,6 +45,8 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
 target_compile_definitions(${PROJECT_NAME} PUBLIC
     $<$<CONFIG:Release>:FLUX_RELEASE>
 )
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE FLUX_ENGINE)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${FLUX_SRC_PATH})
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_PATH}/include)

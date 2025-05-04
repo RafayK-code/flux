@@ -34,27 +34,20 @@ namespace flux
 */
 
 #ifdef FLUX_DEBUG
-
-#define DBG_FLUX_PRINT(...)     flux::LogManager::Ref().EngineLogger().Info(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
-#define DBG_FLUX_WARN(...)      flux::LogManager::Ref().EngineLogger().Warn(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
-#define DBG_FLUX_ERROR(...)     flux::LogManager::Ref().EngineLogger().Error(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
-#define DBG_FLUX_CRIT(...)      flux::LogManager::Ref().EngineLogger().Critical(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
-
-#define DBG_PRINT(...)          flux::LogManager::Ref().ClientLogger().Info(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
-#define DBG_WARN(...)           flux::LogManager::Ref().ClientLogger().Warn(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
-#define DBG_ERROR(...)          flux::LogManager::Ref().ClientLogger().Error(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
-#define DBG_CRIT(...)           flux::LogManager::Ref().ClientLogger().Critical(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
-
+    #ifdef FLUX_ENGINE
+        #define DBG_PRINT(...)      flux::LogManager::Ref().EngineLogger().Info(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
+        #define DBG_WARN(...)       flux::LogManager::Ref().EngineLogger().Warn(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
+        #define DBG_ERROR(...)      flux::LogManager::Ref().EngineLogger().Error(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
+        #define DBG_CRIT(...)       flux::LogManager::Ref().EngineLogger().Critical(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
+    #else
+        #define DBG_PRINT(...)      flux::LogManager::Ref().ClientLogger().Info(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
+        #define DBG_WARN(...)       flux::LogManager::Ref().ClientLogger().Warn(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
+        #define DBG_ERROR(...)      flux::LogManager::Ref().ClientLogger().Error(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
+        #define DBG_CRIT(...)       flux::LogManager::Ref().ClientLogger().Critical(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
+    #endif
 #else
-
-#define DBG_FLUX_PRINT(...)
-#define DBG_FLUX_WARN(...)
-#define DBG_FLUX_ERROR(...)
-#define DBG_FLUX_CRIT(...)
-
-#define DBG_PRINT(...)
-#define DBG_WARN(...)
-#define DBG_ERROR(...)
-#define DBG_CRIT(...)
-
+    #define DBG_PRINT(...)
+    #define DBG_WARN(...)
+    #define DBG_ERROR(...)
+    #define DBG_CRIT(...)
 #endif

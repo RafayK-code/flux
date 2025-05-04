@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef FLUX_ENGINE
+    #define FLUX_EXPORT
+#endif
+
 #if defined(FLUX_BUILD_SHARED) && defined(FLUX_PLATFORM_WINDOWS)
     #ifdef FLUX_EXPORT
         #define FLUX_API __declspec(dllexport)

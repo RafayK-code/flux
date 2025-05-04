@@ -15,3 +15,22 @@
 #endif
 
 constexpr const char* ENGINE_NAME = "Flux";
+
+/**
+* TODO: More compiler checks
+*/
+
+#if defined(FLUX_PLATFORM_WINDOWS) && defined(_MSC_VER)
+    #define FLUX_COMPILER_MSC
+#endif
+
+#ifdef FLUX_DEBUG
+    #ifdef FLUX_COMPILER_MSC
+        #define DBG_BREAK __debugbreak()
+    #else
+        #include <csignal>
+        #define DBG_BREAK raise(SIGTRAP)
+    #endif
+#else
+    #define DBG_BREAK
+#endif

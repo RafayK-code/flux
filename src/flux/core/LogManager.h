@@ -19,6 +19,7 @@ namespace flux
     private:
         LogManager(const std::string& clientName);
 
+    private:
         Logger engineLogger_;
         Logger clientLogger_;
 

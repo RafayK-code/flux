@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 project(flux)
 
 set(FLUX_BUILD_SHARED ON CACHE BOOL "Build engine as shared library")
+set(FLUX_ENABLE_THREADING ON CACHE BOOL "Support multithreading safety within flux")
+set(FLUX_ENABLE_INTRUSIVE_REF OFF CACHE BOOL "Support multithreading safety within flux")
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -11,8 +13,8 @@ set(GLAD_PATH ${CMAKE_SOURCE_DIR}/extern/glad)
 set(SPDLOG_PATH ${CMAKE_SOURCE_DIR}/extern/spdlog)
 
 file(GLOB_RECURSE FLUX_SRC_FILES
-    "${FLUX_SRC_PATH}/*.cpp"
-    "${FLUX_SRC_PATH}/*.h"
+    "${FLUX_SRC_PATH}/flux/*.cpp"
+    "${FLUX_SRC_PATH}/flux/*.h"
 )
 
 # handle type of library
@@ -46,7 +48,14 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
     $<$<CONFIG:Release>:FLUX_RELEASE>
 )
 
+# other compile definitions
 target_compile_definitions(${PROJECT_NAME} PRIVATE FLUX_ENGINE)
+if(${FLUX_ENABLE_INTRUSIVE_REF})
+    target_compile_definitions(${PROJECT_NAME} PUBLIC FLUX_USE_INTRUSIVE_REF)
+endif()
+if(${FLUX_ENABLE_THREADING})
+    target_compile_definitions(${PROJECT_NAME} PUBLIC FLUX_THREADSAFE)
+endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${FLUX_SRC_PATH})
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_PATH}/include)

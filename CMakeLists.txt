@@ -17,6 +17,8 @@ file(GLOB_RECURSE FLUX_SRC_FILES
     "${FLUX_SRC_PATH}/flux/*.h"
 )
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/platform.cmake)
+
 # handle type of library
 if(${FLUX_BUILD_SHARED})
     add_library(${PROJECT_NAME} SHARED ${FLUX_SRC_FILES})

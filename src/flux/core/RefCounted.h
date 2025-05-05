@@ -34,7 +34,7 @@ namespace flux
         RefCounted(RefCounted&& other) noexcept;
         RefCounted& operator=(RefCounted&& other) noexcept;
 
-        uint32_t RefCount() const { return refCount_; }
+        uint32_t RefCount() const { return refCount_.load(); }
 
     private:
         void IncRef();
@@ -42,7 +42,7 @@ namespace flux
 
     private:
 #ifdef FLUX_THREADSAFE
-        std::atomic<uint32_t> refCount_;
+        mutable std::atomic<uint32_t> refCount_;
 #else
         uint32_t refCount_;
 #endif

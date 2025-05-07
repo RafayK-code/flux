@@ -12,3 +12,5 @@
 
 #include <flux/core/base.h>
 #include <flux/core/LogManager.h>
+
+#include <glad/glad.h>

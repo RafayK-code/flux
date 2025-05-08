@@ -33,13 +33,13 @@ namespace flux
 
         void Update();
 
-        uint32_t Width() const { return data_.width; }
-        uint32_t Height() const { return data_.height; }
+        inline uint32_t Width() const { return data_.width; }
+        inline uint32_t Height() const { return data_.height; }
 
         void Resize(uint32_t width, uint32_t height);
 
         void SetVSync(bool enabled);
-        bool IsVSync() const { return data_.vSync; }
+        inline bool IsVSync() const { return data_.vSync; }
 
         enum class Mode
         {
@@ -49,9 +49,9 @@ namespace flux
         };
 
         void SetMode(Mode mode);
-        Mode GetMode() const { return data_.mode; }
+        inline Mode GetMode() const { return data_.mode; }
 
-        GLFWwindow* GetNativePtr() const { return window_; }
+        inline GLFWwindow* GetNativePtr() const { return window_; }
 
     private:
         GLFWwindow* window_;

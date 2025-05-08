@@ -3,6 +3,12 @@ file(GLOB FLUX_CORE
     "${FLUX_SRC_PATH}/flux/core/*.cpp"
 )
 
+file(GLOB FLUX_CORE_DELEGATE
+    "${FLUX_SRC_PATH}/flux/core/delegate/*.h"
+    "${FLUX_SRC_PATH}/flux/core/delegate/*.cpp"
+)
+
+
 file(GLOB FLUX_UTIL
     "${FLUX_SRC_PATH}/flux/util/*.h"
     "${FLUX_SRC_PATH}/flux/util/*.cpp"
@@ -24,6 +30,7 @@ set(FLUX_GEN
 
 source_group("gen" FILES ${FLUX_GEN})
 source_group("core" FILES ${FLUX_CORE})
+source_group("core/delegate" FILES ${FLUX_CORE_DELEGATE})
 source_group("util" FILES ${FLUX_UTIL})
 source_group("window" FILES ${FLUX_WINDOW})
 source_group("renderer" FILES ${FLUX_RENDERER})

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.20)
 project(flux)
 
 set(FLUX_BUILD_SHARED ON CACHE BOOL "Build engine as shared library")

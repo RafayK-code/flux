@@ -46,11 +46,13 @@ namespace flux
         #define DBG_ERROR(...)      flux::LogManager::Ref().ClientLogger().Error(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
         #define DBG_CRIT(...)       flux::LogManager::Ref().ClientLogger().Critical(CREATE_NEW_SOURCE_LOC, __VA_ARGS__)
     #endif
+
+    #define DBG_ASSERT(cond, ...)   if ((cond)) {} else { DBG_CRIT(__VA_ARGS__); DBG_BREAK; }
 #else
     #define DBG_PRINT(...)
     #define DBG_WARN(...)
     #define DBG_ERROR(...)
     #define DBG_CRIT(...)
-#endif
 
-#define DBG_ASSERT(cond, ...)   if ((cond)) {} else { DBG_CRIT(__VA_ARGS__); DBG_BREAK; }
+    #define DBG_ASSERT(cond, ...)
+#endif

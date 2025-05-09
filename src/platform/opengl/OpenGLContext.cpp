@@ -30,8 +30,8 @@ namespace flux
 
     void OpenGLContext::PreWindowCreateHints()
     {
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, FLUX_GL_VERSION_MAJOR);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, FLUX_GL_VERSION_MINOR);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #ifdef FLUX_PLATFORM_APPLE
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);

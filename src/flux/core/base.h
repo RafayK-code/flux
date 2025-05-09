@@ -34,3 +34,6 @@ constexpr const char* ENGINE_NAME = "Flux";
 #else
     #define DBG_BREAK
 #endif
+
+constexpr int FLUX_GL_VERSION_MAJOR = 4;
+constexpr int FLUX_GL_VERSION_MINOR = 1;

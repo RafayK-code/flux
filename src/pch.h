@@ -9,6 +9,7 @@
 #include <memory>
 #include <utility>
 #include <functional>
+#include <algorithm>
 
 #include <flux/core/base.h>
 #include <flux/core/LogManager.h>

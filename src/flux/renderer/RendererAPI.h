@@ -15,7 +15,7 @@ namespace flux
             Vulkan
         };
 
-        static Scope<RendererAPI> Create(Type type);
+        //static Scope<RendererAPI> Create(Type type);
         static Type Current() { return currentAPI; }
 
         virtual void Init() = 0;
@@ -25,6 +25,6 @@ namespace flux
         virtual void EndFrame() = 0;
 
     private:
-        static Type currentAPI;
+        static const Type currentAPI = Type::Vulkan;
     };
 }

@@ -14,4 +14,5 @@
 #include <flux/core/base.h>
 #include <flux/core/LogManager.h>
 
+#include <vulkan/vulkan.h>
 #include <glad/glad.h>

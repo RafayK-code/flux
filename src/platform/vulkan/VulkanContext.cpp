@@ -114,7 +114,7 @@ namespace flux
         info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         info.pApplicationName = ENGINE_NAME;
         info.pEngineName = ENGINE_NAME;
-        info.apiVersion = VK_API_VERSION_1_0;
+        info.apiVersion = VK_API_VERSION_1_2;
 
         uint32_t extensionCount = 0;
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);

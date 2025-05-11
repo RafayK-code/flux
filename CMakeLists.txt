@@ -14,11 +14,15 @@ set(FLUX_SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(GLFW_PATH ${CMAKE_SOURCE_DIR}/extern/glfw)
 set(GLAD_PATH ${CMAKE_SOURCE_DIR}/extern/glad)
 set(SPDLOG_PATH ${CMAKE_SOURCE_DIR}/extern/spdlog)
+set(VMA_PATH ${CMAKE_SOURCE_DIR}/extern/vma)
 
 file(GLOB_RECURSE FLUX_SRC_FILES
     "${FLUX_SRC_PATH}/flux/*.cpp"
     "${FLUX_SRC_PATH}/flux/*.h"
 )
+
+# add pch.h to sources
+list(APPEND FLUX_SRC_FILES "${FLUX_SRC_PATH}/pch.h")
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/platform.cmake)
 
@@ -66,9 +70,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${FLUX_SRC_PATH})
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLAD_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${SPDLOG_PATH}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${VMA_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
 target_link_libraries(${PROJECT_NAME} PUBLIC glad)
 target_link_libraries(${PROJECT_NAME} PUBLIC spdlog)
+target_link_libraries(${PROJECT_NAME} PUBLIC vma)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Vulkan_LIBRARIES})

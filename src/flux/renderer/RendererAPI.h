@@ -25,6 +25,6 @@ namespace flux
         virtual void EndFrame() = 0;
 
     private:
-        static const Type currentAPI = Type::Vulkan;
+        static Type currentAPI;
     };
 }

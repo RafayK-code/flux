@@ -12,6 +12,8 @@ namespace flux
     static bool enableValidationLayers = false; // Let's leave this on for now...
 #endif
 
+    static uint32_t vulkanContextCount = 0;
+
     static constexpr const char* VkDebugUtilsMessageType(const VkDebugUtilsMessageTypeFlagsEXT type)
     {
         switch (type)
@@ -107,11 +109,63 @@ namespace flux
         return extensions;
     }
 
+    VkInstance VulkanContext::vulkanInstance_ = nullptr;
+    Ref<VulkanDevice> VulkanContext::device_ = nullptr;
+    Ref<VulkanPhysicalDevice> VulkanContext::physicalDevice_ = nullptr;;
+    VkDebugUtilsMessengerEXT VulkanContext::debugUtilsMessenger_ = nullptr;
+
     VulkanContext::VulkanContext(GLFWwindow* window)
-        : vulkanInstance_(nullptr), debugUtilsMessenger_(nullptr), surface_(nullptr), windowHandle_(window)
+        : surface_(nullptr), windowHandle_(window)
     {
         DBG_ASSERT(windowHandle_, "Window cannot be null");
 
+        if (vulkanContextCount == 0)
+        {
+            CreateInstance();
+        }
+
+        VkResult createRes = glfwCreateWindowSurface(vulkanInstance_, windowHandle_, nullptr, &surface_);
+        DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan surface");
+
+        //gross... but technically needs the surface in order to work
+        if (vulkanContextCount == 0)
+        {
+            CreateDevice();
+        }
+
+        vulkanContextCount++;
+    }
+
+    VulkanContext::~VulkanContext()
+    {
+        device_->Idle();
+
+        vkDestroySurfaceKHR(vulkanInstance_, surface_, nullptr);
+        vulkanContextCount--;
+
+        if (vulkanContextCount == 0)
+        {
+            device_.reset();
+
+            if (debugUtilsMessenger_)
+            {
+                PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)
+                    vkGetInstanceProcAddr(vulkanInstance_, "vkDestroyDebugUtilsMessengerEXT");
+
+                vkDestroyDebugUtilsMessengerEXT(vulkanInstance_, debugUtilsMessenger_, nullptr);
+            }
+
+            vkDestroyInstance(vulkanInstance_, nullptr);
+        }
+    }
+
+    void VulkanContext::PreWindowCreateHints()
+    {
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    }
+
+    void VulkanContext::CreateInstance()
+    {
         VkApplicationInfo info{};
         info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         info.pApplicationName = ENGINE_NAME;
@@ -151,9 +205,6 @@ namespace flux
         VkResult createRes = vkCreateInstance(&createInfo, nullptr, &vulkanInstance_);
         DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan instance");
 
-        createRes = glfwCreateWindowSurface(vulkanInstance_, windowHandle_, nullptr, &surface_);
-        DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan surface");
-
         if (enableValidationLayers)
         {
             PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vulkanInstance_, "vkCreateDebugUtilsMessengerEXT");
@@ -167,7 +218,10 @@ namespace flux
             createRes = vkCreateDebugUtilsMessengerEXT(vulkanInstance_, &debugUtilsCreateInfo, nullptr, &debugUtilsMessenger_);
             DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan debug messenger");
         }
+    }
 
+    void VulkanContext::CreateDevice()
+    {
         physicalDevice_ = VulkanPhysicalDevice::Select(vulkanInstance_, surface_);
 
         VkPhysicalDeviceFeatures enabledFeatures;
@@ -180,26 +234,5 @@ namespace flux
         enabledFeatures.shaderStorageImageReadWithoutFormat = true;
 
         device_ = CreateRef<VulkanDevice>(physicalDevice_, enabledFeatures);
-    }
-
-    VulkanContext::~VulkanContext()
-    {
-        device_.reset();
-
-        if (debugUtilsMessenger_)
-        {
-            PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)
-                vkGetInstanceProcAddr(vulkanInstance_, "vkDestroyDebugUtilsMessengerEXT");
-
-            vkDestroyDebugUtilsMessengerEXT(vulkanInstance_, debugUtilsMessenger_, nullptr);
-        }
-
-        vkDestroySurfaceKHR(vulkanInstance_, surface_, nullptr);
-        vkDestroyInstance(vulkanInstance_, nullptr);
-    }
-
-    void VulkanContext::PreWindowCreateHints()
-    {
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     }
 }

@@ -23,6 +23,11 @@ namespace flux
         DBG_PRINT("Version: {0}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
     }
 
+    void OpenGLContext::BindContext()
+    {
+        glfwMakeContextCurrent(windowHandle_);
+    }
+
     void OpenGLContext::SwapBuffers()
     {
         glfwSwapBuffers(windowHandle_);

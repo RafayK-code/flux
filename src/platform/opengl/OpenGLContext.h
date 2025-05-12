@@ -12,6 +12,7 @@ namespace flux
         OpenGLContext(GLFWwindow* window);
         virtual ~OpenGLContext() = default;
 
+        virtual void BindContext() override;
         virtual void SwapBuffers() override;
 
         static void PreWindowCreateHints();

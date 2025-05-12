@@ -19,21 +19,27 @@ namespace flux
         VulkanContext(GLFWwindow* window);
         virtual ~VulkanContext();
 
+        virtual void BindContext() override {}
         virtual void SwapBuffers() override {}
 
         static void PreWindowCreateHints();
 
-        inline VkInstance Instance() const { return vulkanInstance_; }
+        static inline VkInstance Instance() { return vulkanInstance_; }
+        static inline const Ref<VulkanDevice> Device() { return device_; }
+
         inline VkSurfaceKHR Surface() const { return surface_; }
 
     private:
-        VkInstance vulkanInstance_;
-        VkDebugUtilsMessengerEXT debugUtilsMessenger_;
+        void CreateInstance();
+        void CreateDevice();
+
+    private:
+        static VkInstance vulkanInstance_;
+        static Ref<VulkanDevice> device_;
+        static Ref<VulkanPhysicalDevice> physicalDevice_;
+        static VkDebugUtilsMessengerEXT debugUtilsMessenger_;
+
         VkSurfaceKHR surface_;
-
-        Ref<VulkanDevice> device_;
-        Ref<VulkanPhysicalDevice> physicalDevice_;
-
         GLFWwindow* windowHandle_;
     };
 }

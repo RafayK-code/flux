@@ -88,7 +88,13 @@ namespace flux
 
         // vulkan wants the mem addr so this cant be cosntexpr
         static const float defaultQueuePriority = 0.0f;
-        std::set<uint32_t> uniqueQueueFamiles = { queueFamilyIndices_.graphicsFamily, queueFamilyIndices_.presentFamily };
+        std::set<uint32_t> uniqueQueueFamiles = 
+        { 
+            queueFamilyIndices_.graphicsFamily,
+#ifdef FLUX_VK_USE_PRESENT_QUEUE
+            queueFamilyIndices_.presentFamily
+#endif
+        };
 
         for (uint32_t queueFamily : uniqueQueueFamiles)
         {

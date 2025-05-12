@@ -11,8 +11,6 @@ namespace flux
         VulkanDevice(const Ref<VulkanPhysicalDevice>& physicalDevice, VkPhysicalDeviceFeatures enabledFeatures);
         ~VulkanDevice();
 
-        void Destroy();
-
         VkQueue GraphicQueue() const { return graphicsQueue_; }
 #ifdef FLUX_VK_USE_PRESENT_QUEUE
         VkQueue PresentQueue() const { return presentQueue_; }
@@ -23,6 +21,8 @@ namespace flux
 
         const Ref<VulkanPhysicalDevice>& PhysicalDevice() const { return physicalDevice_; }
         VkDevice NativeVulkanDevice() const { return logicalDevice_; }
+
+        void Idle() const;
 
     private:
         VkDevice logicalDevice_;

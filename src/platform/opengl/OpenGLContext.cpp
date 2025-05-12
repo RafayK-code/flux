@@ -11,10 +11,7 @@ namespace flux
         : windowHandle_(window)
     {
         DBG_ASSERT(windowHandle_, "Window cannot be null");
-    }
 
-    void OpenGLContext::Init()
-    {
         glfwMakeContextCurrent(windowHandle_);
 
         int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);

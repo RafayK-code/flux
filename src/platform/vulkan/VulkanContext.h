@@ -19,7 +19,6 @@ namespace flux
         VulkanContext(GLFWwindow* window);
         virtual ~VulkanContext();
 
-        virtual void Init() override;
         virtual void SwapBuffers() override {}
 
         static void PreWindowCreateHints();

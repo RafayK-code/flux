@@ -11,9 +11,6 @@ namespace flux
         static Ref<GraphicsContext> Create(void* window);
 
         virtual ~GraphicsContext() = default;
-
-        // we need two phase init cuz of vulkan... arghhh
-        virtual void Init() = 0;
         virtual void SwapBuffers() = 0;
 
         static void PreWindowCreateHints();

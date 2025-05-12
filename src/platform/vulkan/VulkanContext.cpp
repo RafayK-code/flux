@@ -111,26 +111,7 @@ namespace flux
         : vulkanInstance_(nullptr), debugUtilsMessenger_(nullptr), surface_(nullptr), windowHandle_(window)
     {
         DBG_ASSERT(windowHandle_, "Window cannot be null");
-    }
 
-    VulkanContext::~VulkanContext()
-    {
-        device_.reset();
-
-        if (debugUtilsMessenger_)
-        {
-            PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)
-                vkGetInstanceProcAddr(vulkanInstance_, "vkDestroyDebugUtilsMessengerEXT");
-
-            vkDestroyDebugUtilsMessengerEXT(vulkanInstance_, debugUtilsMessenger_, nullptr);
-        }
-
-        vkDestroySurfaceKHR(vulkanInstance_, surface_, nullptr);
-        vkDestroyInstance(vulkanInstance_, nullptr);
-    }
-
-    void VulkanContext::Init()
-    {
         VkApplicationInfo info{};
         info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         info.pApplicationName = ENGINE_NAME;
@@ -199,6 +180,22 @@ namespace flux
         enabledFeatures.shaderStorageImageReadWithoutFormat = true;
 
         device_ = CreateRef<VulkanDevice>(physicalDevice_, enabledFeatures);
+    }
+
+    VulkanContext::~VulkanContext()
+    {
+        device_.reset();
+
+        if (debugUtilsMessenger_)
+        {
+            PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)
+                vkGetInstanceProcAddr(vulkanInstance_, "vkDestroyDebugUtilsMessengerEXT");
+
+            vkDestroyDebugUtilsMessengerEXT(vulkanInstance_, debugUtilsMessenger_, nullptr);
+        }
+
+        vkDestroySurfaceKHR(vulkanInstance_, surface_, nullptr);
+        vkDestroyInstance(vulkanInstance_, nullptr);
     }
 
     void VulkanContext::PreWindowCreateHints()

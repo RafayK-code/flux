@@ -5,13 +5,15 @@
 
 namespace flux
 {
-    class FLUX_API GraphicsContext
+    class FLUX_API GraphicsContext : RefCounted
     {
     public:
-        static Scope<GraphicsContext> Create(void* window);
+        static Ref<GraphicsContext> Create(void* window);
 
         virtual ~GraphicsContext() = default;
 
+        // we need two phase init cuz of vulkan... arghhh
+        virtual void Init() = 0;
         virtual void SwapBuffers() = 0;
 
         static void PreWindowCreateHints();

@@ -8,12 +8,12 @@
 
 namespace flux
 {
-    Scope<GraphicsContext> GraphicsContext::Create(void* window)
+    Ref<GraphicsContext> GraphicsContext::Create(void* window)
     {
         switch (RendererAPI::Current())
         {
-        case RendererAPI::Type::OpenGL: return CreateScope<OpenGLContext>((GLFWwindow*)window);
-        case RendererAPI::Type::Vulkan: return CreateScope<VulkanContext>();
+        case RendererAPI::Type::OpenGL: return CreateRef<OpenGLContext>((GLFWwindow*)window);
+        case RendererAPI::Type::Vulkan: return CreateRef<VulkanContext>((GLFWwindow*)window);
         }
         
         DBG_ASSERT(false, "Invalid renderer API");
@@ -24,8 +24,8 @@ namespace flux
     {
         switch (RendererAPI::Current())
         {
-        case RendererAPI::Type::OpenGL: OpenGLContext::PreWindowCreateHints();
-        case RendererAPI::Type::Vulkan: VulkanContext::PreWindowCreateHints();
+        case RendererAPI::Type::OpenGL: OpenGLContext::PreWindowCreateHints(); break;
+        case RendererAPI::Type::Vulkan: VulkanContext::PreWindowCreateHints(); break;
         }
     }
 }

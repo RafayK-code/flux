@@ -31,6 +31,7 @@ namespace flux
         glfwWindowCount++;
 
         context_ = GraphicsContext::Create(window_);
+        context_->Init();
 
         glfwSetWindowUserPointer(window_, &data_);
 
@@ -44,6 +45,7 @@ namespace flux
 
     Window::~Window()
     {
+        context_.reset();
         glfwDestroyWindow(window_);
         glfwWindowCount--;
 

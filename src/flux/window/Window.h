@@ -55,7 +55,7 @@ namespace flux
 
     private:
         GLFWwindow* window_;
-        Scope<GraphicsContext> context_;
+        Ref<GraphicsContext> context_;
 
         // need to make a struct so that we can toss it to glfw
         struct WindowData

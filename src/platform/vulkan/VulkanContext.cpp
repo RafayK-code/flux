@@ -107,8 +107,29 @@ namespace flux
         return extensions;
     }
 
-    VulkanContext::VulkanContext()
-        : debugUtilsMessenger_(nullptr)
+    VulkanContext::VulkanContext(GLFWwindow* window)
+        : vulkanInstance_(nullptr), debugUtilsMessenger_(nullptr), surface_(nullptr), windowHandle_(window)
+    {
+        DBG_ASSERT(windowHandle_, "Window cannot be null");
+    }
+
+    VulkanContext::~VulkanContext()
+    {
+        device_.reset();
+
+        if (debugUtilsMessenger_)
+        {
+            PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)
+                vkGetInstanceProcAddr(vulkanInstance_, "vkDestroyDebugUtilsMessengerEXT");
+
+            vkDestroyDebugUtilsMessengerEXT(vulkanInstance_, debugUtilsMessenger_, nullptr);
+        }
+
+        vkDestroySurfaceKHR(vulkanInstance_, surface_, nullptr);
+        vkDestroyInstance(vulkanInstance_, nullptr);
+    }
+
+    void VulkanContext::Init()
     {
         VkApplicationInfo info{};
         info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -149,6 +170,9 @@ namespace flux
         VkResult createRes = vkCreateInstance(&createInfo, nullptr, &vulkanInstance_);
         DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan instance");
 
+        createRes = glfwCreateWindowSurface(vulkanInstance_, windowHandle_, nullptr, &surface_);
+        DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan surface");
+
         if (enableValidationLayers)
         {
             PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vulkanInstance_, "vkCreateDebugUtilsMessengerEXT");
@@ -162,21 +186,19 @@ namespace flux
             createRes = vkCreateDebugUtilsMessengerEXT(vulkanInstance_, &debugUtilsCreateInfo, nullptr, &debugUtilsMessenger_);
             DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan debug messenger");
         }
-    }
 
-    VulkanContext::~VulkanContext()
-    {
-        if (debugUtilsMessenger_)
-        {
-            PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)
-                vkGetInstanceProcAddr(vulkanInstance_, "vkDestroyDebugUtilsMessengerEXT");
+        physicalDevice_ = VulkanPhysicalDevice::Select(vulkanInstance_, surface_);
 
-            vkDestroyDebugUtilsMessengerEXT(vulkanInstance_, debugUtilsMessenger_, nullptr);
-            debugUtilsMessenger_ = nullptr;
-        }
+        VkPhysicalDeviceFeatures enabledFeatures;
+        memset(&enabledFeatures, 0, sizeof(VkPhysicalDeviceFeatures));
+        enabledFeatures.samplerAnisotropy = true;
+        enabledFeatures.wideLines = true;
+        enabledFeatures.fillModeNonSolid = true;
+        enabledFeatures.independentBlend = true;
+        enabledFeatures.pipelineStatisticsQuery = true;
+        enabledFeatures.shaderStorageImageReadWithoutFormat = true;
 
-        vkDestroyInstance(vulkanInstance_, nullptr);
-        vulkanInstance_ = nullptr;
+        device_ = CreateRef<VulkanDevice>(physicalDevice_, enabledFeatures);
     }
 
     void VulkanContext::PreWindowCreateHints()

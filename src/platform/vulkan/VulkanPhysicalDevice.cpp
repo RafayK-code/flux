@@ -100,7 +100,7 @@ namespace flux
         {
             VkDeviceQueueCreateInfo queueInfo{};
             queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-            queueInfo.queueFamilyIndex = queueFamilyIndices_.graphicsFamily;
+            queueInfo.queueFamilyIndex = queueFamily;
             queueInfo.queueCount = 1;
             queueInfo.pQueuePriorities = &defaultQueuePriority;
             queueCreateInfos_.push_back(queueInfo);

@@ -11,7 +11,7 @@
         #define FLUX_API __declspec(dllimport)
     #endif
 #else
-    #define FLUX_API __attribute__((visibility("default")))
+    #define FLUX_API
 #endif
 
 constexpr const char* ENGINE_NAME = "Flux";

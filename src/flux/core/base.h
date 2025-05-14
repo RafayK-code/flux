@@ -14,8 +14,6 @@
     #define FLUX_API
 #endif
 
-constexpr const char* ENGINE_NAME = "Flux";
-
 /**
 * TODO: More compiler checks
 */
@@ -35,5 +33,10 @@ constexpr const char* ENGINE_NAME = "Flux";
     #define DBG_BREAK
 #endif
 
-constexpr int FLUX_GL_VERSION_MAJOR = 4;
-constexpr int FLUX_GL_VERSION_MINOR = 1;
+namespace flux
+{
+    constexpr const char* ENGINE_NAME = "Flux";
+
+    constexpr int FLUX_GL_VERSION_MAJOR = 4;
+    constexpr int FLUX_GL_VERSION_MINOR = 1;
+}

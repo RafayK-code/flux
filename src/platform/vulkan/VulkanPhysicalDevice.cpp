@@ -64,37 +64,18 @@ namespace flux
             }
         }
 
-        for (uint32_t i = 0; i < queueFamilyProperties_.size(); i++)
+        for (uint32_t i = 0; i < queueFamilyCount; i++)
         {
             if (queueFamilyProperties_[i].queueCount > 0 && queueFamilyProperties_[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-            {
                 queueFamilyIndices_.graphicsFamily = i;
-                queueFamilyIndices_.graphicsFamilyHasValue = true;
-            }
 
-#ifdef FLUX_VK_USE_PRESENT_QUEUE
-            VkBool32 presentSupport = true;
-            vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice_, i, surface, &presentSupport);
-
-            if (queueFamilyProperties_[i].queueCount > 0 && presentSupport)
-            {
-                queueFamilyIndices_.presentFamily = i;
-                queueFamilyIndices_.presentFamilyHasValue = true;
-            }
-#endif
             if (queueFamilyIndices_.Complete())
                 break;
         }
 
         // vulkan wants the mem addr so this cant be cosntexpr
         static const float defaultQueuePriority = 0.0f;
-        std::set<uint32_t> uniqueQueueFamiles = 
-        { 
-            queueFamilyIndices_.graphicsFamily,
-#ifdef FLUX_VK_USE_PRESENT_QUEUE
-            queueFamilyIndices_.presentFamily
-#endif
-        };
+        std::set<uint32_t> uniqueQueueFamiles = { queueFamilyIndices_.graphicsFamily };
 
         for (uint32_t queueFamily : uniqueQueueFamiles)
         {

@@ -42,9 +42,6 @@ namespace flux
         DBG_ASSERT(result == VK_SUCCESS, "Failed to create logical device");
 
         vkGetDeviceQueue(logicalDevice_, physicalDevice_->queueFamilyIndices_.graphicsFamily, 0, &graphicsQueue_);
-#ifdef FLUX_VK_USE_PRESENT_QUEUE
-        vkGetDeviceQueue(logicalDevice_, physicalDevice_->queueFamilyIndices_.presentFamily, 0, &presentQueue_);
-#endif
         commandPool_ = CreateRef<VulkanCommandPool>(logicalDevice_, physicalDevice_->queueFamilyIndices_.graphicsFamily);
     }
 

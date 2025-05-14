@@ -12,9 +12,6 @@ namespace flux
         ~VulkanDevice();
 
         VkQueue GraphicQueue() const { return graphicsQueue_; }
-#ifdef FLUX_VK_USE_PRESENT_QUEUE
-        VkQueue PresentQueue() const { return presentQueue_; }
-#endif
 
         VkCommandBuffer CommandBuffer(bool begin);
         void FlushCommandBuffer(VkCommandBuffer commandBuffer);
@@ -30,9 +27,6 @@ namespace flux
         VkPhysicalDeviceFeatures enabledFeatures_;
 
         VkQueue graphicsQueue_;
-#ifdef FLUX_VK_USE_PRESENT_QUEUE
-        VkQueue presentQueue_;
-#endif
 
         Ref<VulkanCommandPool> commandPool_;
         bool enableDebugMarkers_;

@@ -29,25 +29,12 @@ namespace flux
 
         VkPhysicalDevice NativePhysicalDevice() const { return physicalDevice_; }
 
-#ifdef FLUX_VK_USE_PRESENT_QUEUE
         struct QueueFamilyIndices
         {
-            uint32_t graphicsFamily = 0;
-            uint32_t presentFamily = 0;
-            bool graphicsFamilyHasValue = false;
-            bool presentFamilyHasValue = false;
+            uint32_t graphicsFamily = std::numeric_limits<uint32_t>::max();
 
-            bool Complete() const { return graphicsFamilyHasValue && presentFamilyHasValue; }
+            bool Complete() const { return graphicsFamily != std::numeric_limits<uint32_t>::max(); }
         };
-#else
-        struct QueueFamilyIndices
-        {
-            uint32_t graphicsFamily = 0;
-            bool graphicsFamilyHasValue = false;
-
-            bool Complete() const { return graphicsFamilyHasValue; }
-        };
-#endif
 
         const QueueFamilyIndices& GetQueueFamilyIndices() const { return queueFamilyIndices_; }
 

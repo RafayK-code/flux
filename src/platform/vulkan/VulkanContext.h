@@ -2,6 +2,7 @@
 
 #include <flux/renderer/GraphicsContext.h>
 #include <platform/vulkan/VulkanDevice.h>
+#include <platform/vulkan/VulkanSwapchain.h>
 
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
@@ -41,5 +42,6 @@ namespace flux
 
         VkSurfaceKHR surface_;
         GLFWwindow* windowHandle_;
+        Ref<VulkanSwapchain> swapchain_;
     };
 }

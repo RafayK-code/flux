@@ -4,6 +4,8 @@
 
 namespace flux
 {
+    static VkFormat FindDepthFormat(VkPhysicalDevice physicalDevice);
+
     Ref<VulkanPhysicalDevice> VulkanPhysicalDevice::Select(VkInstance instance, VkSurfaceKHR surface)
     {
         return CreateRef<VulkanPhysicalDevice>(instance, surface);
@@ -86,6 +88,8 @@ namespace flux
             queueInfo.pQueuePriorities = &defaultQueuePriority;
             queueCreateInfos_.push_back(queueInfo);
         }
+
+        depthFormat_ = FindDepthFormat(physicalDevice_);
     }
 
     VulkanPhysicalDevice::~VulkanPhysicalDevice()
@@ -111,5 +115,29 @@ namespace flux
 
         DBG_ASSERT(false, "Could not find a suitable memory type!");
         return std::numeric_limits<uint32_t>::max();
+    }
+
+    static VkFormat FindDepthFormat(VkPhysicalDevice physicalDevice)
+    {
+        // Since all depth formats may be optional, we need to find a suitable depth format to use
+        // Start with the highest precision packed format
+        std::vector<VkFormat> depthFormats = {
+            VK_FORMAT_D32_SFLOAT_S8_UINT,
+            VK_FORMAT_D32_SFLOAT,
+            VK_FORMAT_D24_UNORM_S8_UINT,
+            VK_FORMAT_D16_UNORM_S8_UINT,
+            VK_FORMAT_D16_UNORM
+        };
+        
+        for (auto& format : depthFormats)
+        {
+            VkFormatProperties formatProps;
+            vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &formatProps);
+            // Format must support depth stencil attachment for optimal tiling
+            if (formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+                return format;
+        }
+
+        return VK_FORMAT_UNDEFINED;
     }
 }

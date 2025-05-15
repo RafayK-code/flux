@@ -14,100 +14,11 @@ namespace flux
 
     static uint32_t vulkanContextCount = 0;
 
-    static constexpr const char* VkDebugUtilsMessageType(const VkDebugUtilsMessageTypeFlagsEXT type)
-    {
-        switch (type)
-        {
-        case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:       return "General";
-        case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:    return "Validation";
-        case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:   return "Performance";
-        default:                                                return "Unknown";
-        }
-    }
-
-    static constexpr const char* VkDebugUtilsMessageSeverity(const VkDebugUtilsMessageSeverityFlagBitsEXT severity)
-    {
-        switch (severity)
-        {
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:     return "error";
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:   return "warning";
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:      return "info";
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:   return "verbose";
-        default:                                                return "unknown";
-        }
-    }
-
-    static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugUtilsMessengerCallback(const VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, const VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
-    {
-        (void)pUserData; //Unused argument
-
-        const bool performanceWarnings = false;
-        if (!performanceWarnings)
-        {
-            if (messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT)
-                return VK_FALSE;
-        }
-
-        std::string labels, objects;
-        if (pCallbackData->cmdBufLabelCount)
-        {
-            labels = fmt::format("\tLabels({}): \n", pCallbackData->cmdBufLabelCount);
-            for (uint32_t i = 0; i < pCallbackData->cmdBufLabelCount; ++i)
-            {
-                const auto& label = pCallbackData->pCmdBufLabels[i];
-                const std::string colorStr = fmt::format("[ {}, {}, {}, {} ]", label.color[0], label.color[1], label.color[2], label.color[3]);
-                labels.append(fmt::format("\t\t- Command Buffer Label[{0}]: name: {1}, color: {2}\n", i, label.pLabelName ? label.pLabelName : "NULL", colorStr));
-            }
-        }
-
-        if (pCallbackData->objectCount)
-        {
-            objects = fmt::format("\tObjects({}): \n", pCallbackData->objectCount);
-            for (uint32_t i = 0; i < pCallbackData->objectCount; ++i)
-            {
-                const auto& object = pCallbackData->pObjects[i];
-                objects.append(fmt::format("\t\t- Object[{0}] name: {1}, type: {2}, handle: {3:#x}\n", i, object.pObjectName ? object.pObjectName : "NULL", VkObjectTypeToString(object.objectType), object.objectHandle));
-            }
-        }
-
-        DBG_WARN("{0} {1} message: \n\t{2}\n {3} {4}", VkDebugUtilsMessageType(messageType), VkDebugUtilsMessageSeverity(messageSeverity), pCallbackData->pMessage, labels, objects);
-
-        return VK_FALSE;
-    }
-
-    static bool CheckValidationLayerSupport(const char* validationLayer)
-    {
-        uint32_t layerCount;
-        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
-        std::vector<VkLayerProperties> availableLayers(layerCount);
-        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-        bool layerFound = false;
-
-        for (const auto& layerProperties : availableLayers)
-        {
-            if (strcmp(validationLayer, layerProperties.layerName) == 0)
-            {
-                layerFound = true;
-                break;
-            }
-        }
-
-        return layerFound;
-    }
-
-    static std::vector<const char*> GetRequiredExtensions()
-    {
-        uint32_t glfwExtensionCount = 0;
-        const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-        std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
-
-        if (enableValidationLayers)
-            extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-
-        return extensions;
-    }
+    static constexpr const char* VkDebugUtilsMessageType(const VkDebugUtilsMessageTypeFlagsEXT type);
+    static constexpr const char* VkDebugUtilsMessageSeverity(const VkDebugUtilsMessageSeverityFlagBitsEXT severity);
+    static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugUtilsMessengerCallback(const VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, const VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
+    static bool CheckValidationLayerSupport(const char* validationLayer);
+    static std::vector<const char*> GetRequiredExtensions();
 
     VkInstance VulkanContext::vulkanInstance_ = nullptr;
     Ref<VulkanDevice> VulkanContext::device_ = nullptr;
@@ -133,12 +44,20 @@ namespace flux
             CreateDevice();
         }
 
+        int width, height;
+        glfwGetWindowSize(windowHandle_, &width, &height);
+
+        VulkanSwapchainCreateProps props = { width, height, true };
+        swapchain_ = CreateRef<VulkanSwapchain>(vulkanInstance_, device_, surface_, props);
+
         vulkanContextCount++;
     }
 
     VulkanContext::~VulkanContext()
     {
         device_->Idle();
+
+        swapchain_.reset();
 
         vkDestroySurfaceKHR(vulkanInstance_, surface_, nullptr);
         vulkanContextCount--;
@@ -234,5 +153,100 @@ namespace flux
         enabledFeatures.shaderStorageImageReadWithoutFormat = true;
 
         device_ = CreateRef<VulkanDevice>(physicalDevice_, enabledFeatures);
+    }
+
+    static constexpr const char* VkDebugUtilsMessageType(const VkDebugUtilsMessageTypeFlagsEXT type)
+    {
+        switch (type)
+        {
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:       return "General";
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:    return "Validation";
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:   return "Performance";
+        default:                                                return "Unknown";
+        }
+    }
+
+    static constexpr const char* VkDebugUtilsMessageSeverity(const VkDebugUtilsMessageSeverityFlagBitsEXT severity)
+    {
+        switch (severity)
+        {
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:     return "error";
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:   return "warning";
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:      return "info";
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:   return "verbose";
+        default:                                                return "unknown";
+        }
+    }
+
+    static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugUtilsMessengerCallback(const VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, const VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+    {
+        (void)pUserData; //Unused argument
+
+        const bool performanceWarnings = false;
+        if (!performanceWarnings)
+        {
+            if (messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT)
+                return VK_FALSE;
+        }
+
+        std::string labels, objects;
+        if (pCallbackData->cmdBufLabelCount)
+        {
+            labels = fmt::format("\tLabels({}): \n", pCallbackData->cmdBufLabelCount);
+            for (uint32_t i = 0; i < pCallbackData->cmdBufLabelCount; ++i)
+            {
+                const auto& label = pCallbackData->pCmdBufLabels[i];
+                const std::string colorStr = fmt::format("[ {}, {}, {}, {} ]", label.color[0], label.color[1], label.color[2], label.color[3]);
+                labels.append(fmt::format("\t\t- Command Buffer Label[{0}]: name: {1}, color: {2}\n", i, label.pLabelName ? label.pLabelName : "NULL", colorStr));
+            }
+        }
+
+        if (pCallbackData->objectCount)
+        {
+            objects = fmt::format("\tObjects({}): \n", pCallbackData->objectCount);
+            for (uint32_t i = 0; i < pCallbackData->objectCount; ++i)
+            {
+                const auto& object = pCallbackData->pObjects[i];
+                objects.append(fmt::format("\t\t- Object[{0}] name: {1}, type: {2}, handle: {3:#x}\n", i, object.pObjectName ? object.pObjectName : "NULL", VkObjectTypeToString(object.objectType), object.objectHandle));
+            }
+        }
+
+        DBG_WARN("{0} {1} message: \n\t{2}\n {3} {4}", VkDebugUtilsMessageType(messageType), VkDebugUtilsMessageSeverity(messageSeverity), pCallbackData->pMessage, labels, objects);
+
+        return VK_FALSE;
+    }
+
+    static bool CheckValidationLayerSupport(const char* validationLayer)
+    {
+        uint32_t layerCount;
+        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+        std::vector<VkLayerProperties> availableLayers(layerCount);
+        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+        bool layerFound = false;
+
+        for (const auto& layerProperties : availableLayers)
+        {
+            if (strcmp(validationLayer, layerProperties.layerName) == 0)
+            {
+                layerFound = true;
+                break;
+            }
+        }
+
+        return layerFound;
+    }
+
+    static std::vector<const char*> GetRequiredExtensions()
+    {
+        uint32_t glfwExtensionCount = 0;
+        const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+        std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+        if (enableValidationLayers)
+            extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
+        return extensions;
     }
 }

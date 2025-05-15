@@ -11,7 +11,7 @@ namespace flux
     {
         uint32_t width;
         uint32_t height;
-        bool vSync;
+        bool vsync;
     };
 
     class VulkanSwapchain
@@ -22,9 +22,6 @@ namespace flux
 
         void BeginFrame();
         void Present();
-
-    private:
-        void FindImageFormatAndColorSpace();
 
     private:
         VkInstance instance_;
@@ -77,6 +74,7 @@ namespace flux
 
         uint32_t width_;
         uint32_t height_;
+        bool vsync_;
 
         VkSurfaceKHR surface_;
     };

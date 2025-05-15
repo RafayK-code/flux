@@ -29,6 +29,8 @@ namespace flux
 
         VkPhysicalDevice NativePhysicalDevice() const { return physicalDevice_; }
 
+        VkFormat DepthFormat() const { return depthFormat_; }
+
         struct QueueFamilyIndices
         {
             uint32_t graphicsFamily = std::numeric_limits<uint32_t>::max();
@@ -44,7 +46,7 @@ namespace flux
         VkPhysicalDeviceFeatures features_;
         VkPhysicalDeviceMemoryProperties memoryProperties_;
 
-        //VkFormat depthFormat_;
+        VkFormat depthFormat_;
 
         QueueFamilyIndices queueFamilyIndices_;
 

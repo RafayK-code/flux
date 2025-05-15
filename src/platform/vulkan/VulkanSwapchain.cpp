@@ -1,6 +1,6 @@
 #include <pch.h>
 
-#include <platform/vulkan/VulkanSwapChain.h>
+#include <platform/vulkan/VulkanSwapchain.h>
 #include <platform/vulkan/VulkanContext.h>
 
 // Macro to get a procedure address based on a vulkan instance
@@ -29,6 +29,292 @@ namespace flux
     static PFN_vkAcquireNextImageKHR fpAcquireNextImageKHR;
     static PFN_vkQueuePresentKHR fpQueuePresentKHR;
 
+    static void LoadVkFunctionPointers(VkInstance instance, VkDevice device);
+    static void FindQueueFamilyIndex(uint32_t& graphicsFamilyIndex, uint32_t& presentFamilyIndex, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
+    static void FindImageFormatAndColorSpace(VkFormat& colorFormat, VkColorSpaceKHR& colorSpace, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
+
+    VulkanSwapchain::VulkanSwapchain(VkInstance instance, const Ref<VulkanDevice>& device, VkSurfaceKHR surface, VulkanSwapchainCreateProps& props)
+        : instance_(instance), device_(device), surface_(surface), queueFamilyIndex_(std::numeric_limits<uint32_t>::max()), vsync_(props.vsync)
+    {
+        LoadVkFunctionPointers(instance, device_->NativeVulkanDevice());
+
+        VkPhysicalDevice physicalDevice = device_->PhysicalDevice()->NativePhysicalDevice();
+
+        uint32_t graphicsFamilyIndex, presentFamilyIndex;
+        FindQueueFamilyIndex(graphicsFamilyIndex, presentFamilyIndex, physicalDevice, surface_);
+
+        DBG_ASSERT(graphicsFamilyIndex != std::numeric_limits<uint32_t>::max(), "Couldnt find a graphics queue");
+        DBG_ASSERT(graphicsFamilyIndex == presentFamilyIndex, "Flux does not support different queue familes for present and graphics");
+
+        queueFamilyIndex_ = graphicsFamilyIndex;
+
+        FindImageFormatAndColorSpace(colorFormat_, colorSpace_, physicalDevice, surface_);;
+
+        VkDevice vulkanDevice = device_->NativeVulkanDevice();
+
+        VkSurfaceCapabilitiesKHR surfCaps{};
+        VkResult result = fpGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface_, &surfCaps);
+        DBG_ASSERT(result == VK_SUCCESS, "");
+
+        uint32_t presentModeCount;
+        result = fpGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface_, &presentModeCount, nullptr);
+        DBG_ASSERT(result == VK_SUCCESS && presentModeCount > 0, "");
+
+        std::vector<VkPresentModeKHR> presentModes(presentModeCount);
+        result = fpGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface_, &presentModeCount, presentModes.data());
+        DBG_ASSERT(result == VK_SUCCESS, "");
+
+        VkExtent2D swapchainExtent{};
+        if (surfCaps.currentExtent.width == std::numeric_limits<uint32_t>::max())
+        {
+            swapchainExtent.width = props.width;
+            swapchainExtent.height = props.height;
+        }
+        else
+        {
+            swapchainExtent = surfCaps.currentExtent;
+            props.width = swapchainExtent.width;
+            props.height = swapchainExtent.height;
+        }
+
+        width_ = props.width;
+        height_ = props.height;
+
+        DBG_ASSERT(width_ > 0 && height_ > 0, "invalid parameters for width and height");
+
+        VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+
+        // look for a better fit
+        VkPresentModeKHR otherPresentMode = vsync_ ? VK_PRESENT_MODE_MAILBOX_KHR : VK_PRESENT_MODE_IMMEDIATE_KHR;
+        for (uint32_t i = 0; i < presentModeCount; i++)
+        {
+            if (presentModes[i] == otherPresentMode)
+            {
+                swapchainPresentMode = otherPresentMode;
+                break;
+            }
+        }
+
+        uint32_t desiredNumberOfSwapchainImages = surfCaps.minImageCount + 1;
+        if (surfCaps.maxImageCount > 0 && (desiredNumberOfSwapchainImages > surfCaps.maxImageCount))
+            desiredNumberOfSwapchainImages = surfCaps.maxImageCount;
+
+        VkSurfaceTransformFlagsKHR preTransform = surfCaps.currentTransform;
+        if (surfCaps.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
+            preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+
+        // surfaces arent always opaque interestingly enough...
+        VkCompositeAlphaFlagBitsKHR compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+        std::vector<VkCompositeAlphaFlagBitsKHR> compositeAlphaFlags = {
+            VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+            VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
+            VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
+            VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
+        };
+
+        for (auto compositeAlphaFlag : compositeAlphaFlags)
+        {
+            if (surfCaps.supportedCompositeAlpha & compositeAlphaFlag)
+            {
+                compositeAlpha = compositeAlphaFlag;
+                break;
+            };
+        }
+
+        // finally
+        VkSwapchainCreateInfoKHR swapchainCreateInfo{};
+        swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+        swapchainCreateInfo.pNext = nullptr;
+        swapchainCreateInfo.surface = surface_;
+        swapchainCreateInfo.minImageCount = desiredNumberOfSwapchainImages;
+        swapchainCreateInfo.imageFormat = colorFormat_;
+        swapchainCreateInfo.imageColorSpace = colorSpace_;
+        swapchainCreateInfo.imageExtent = swapchainExtent;
+        swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        swapchainCreateInfo.preTransform = (VkSurfaceTransformFlagBitsKHR)preTransform;
+        swapchainCreateInfo.imageArrayLayers = 1;
+        swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        swapchainCreateInfo.queueFamilyIndexCount = 0;      // ignored due to sharing mode
+        swapchainCreateInfo.pQueueFamilyIndices = nullptr;  // ignored due to sharing mode
+        swapchainCreateInfo.presentMode = swapchainPresentMode;
+        swapchainCreateInfo.oldSwapchain = nullptr;         // BAD - need a way to recreate a swap chain from an old one
+        swapchainCreateInfo.clipped = VK_TRUE;
+        swapchainCreateInfo.compositeAlpha = compositeAlpha;
+
+        if (surfCaps.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_SRC_BIT)
+            swapchainCreateInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+
+        if (surfCaps.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT)
+            swapchainCreateInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+        result = fpCreateSwapchainKHR(vulkanDevice, &swapchainCreateInfo, nullptr, &swapchain_);
+        DBG_ASSERT(result == VK_SUCCESS, "Failed to create swapchain");
+
+        result = fpGetSwapchainImagesKHR(vulkanDevice, swapchain_, &imageCount_, nullptr);
+        DBG_ASSERT(result == VK_SUCCESS, "");
+
+        vulkanImages_.resize(imageCount_);
+        result = fpGetSwapchainImagesKHR(vulkanDevice, swapchain_, &imageCount_, vulkanImages_.data());
+        DBG_ASSERT(result == VK_SUCCESS, "");
+
+        images_.resize(imageCount_);
+        for (uint32_t i = 0; i < imageCount_; i++)
+        {
+            VkImageViewCreateInfo colorAttachmentView{};
+            colorAttachmentView.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            colorAttachmentView.pNext = nullptr;
+            colorAttachmentView.format = colorFormat_;
+            colorAttachmentView.image = vulkanImages_[i];
+            colorAttachmentView.components = {
+                VK_COMPONENT_SWIZZLE_R,
+                VK_COMPONENT_SWIZZLE_G,
+                VK_COMPONENT_SWIZZLE_B,
+                VK_COMPONENT_SWIZZLE_A
+            };
+            colorAttachmentView.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            colorAttachmentView.subresourceRange.baseMipLevel = 0;
+            colorAttachmentView.subresourceRange.levelCount = 1;
+            colorAttachmentView.subresourceRange.baseArrayLayer = 0;
+            colorAttachmentView.subresourceRange.layerCount = 1;
+            colorAttachmentView.viewType = VK_IMAGE_VIEW_TYPE_2D;
+            colorAttachmentView.flags = 0;
+
+            images_[i].image = vulkanImages_[i];
+
+            result = vkCreateImageView(vulkanDevice, &colorAttachmentView, nullptr, &images_[i].imageView);
+            DBG_ASSERT(result == VK_SUCCESS, "Failed to create image view: {0}", i);
+        }
+
+        // create swapchain command buffers (seperate command pool for each swapchain buffer, will change this to use the central one on device)
+        {
+            VkCommandPoolCreateInfo poolCreateInfo{};
+            poolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+            poolCreateInfo.queueFamilyIndex = queueFamilyIndex_;
+            poolCreateInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+
+            VkCommandBufferAllocateInfo bufferAllocateInfo{};
+            bufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+            bufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+            bufferAllocateInfo.commandBufferCount = 1;
+
+            commandBuffers_.resize(imageCount_);
+            for (uint32_t i = 0; i < imageCount_; i++)
+            {
+                result = vkCreateCommandPool(vulkanDevice, &poolCreateInfo, nullptr, &commandBuffers_[i].commandPool);
+                DBG_ASSERT(result == VK_SUCCESS, "Failed to create command pool: {0}", i);
+
+                bufferAllocateInfo.commandPool = commandBuffers_[i].commandPool;
+                result = vkAllocateCommandBuffers(vulkanDevice, &bufferAllocateInfo, &commandBuffers_[i].commandBuffer);
+                DBG_ASSERT(result == VK_SUCCESS, "Failed to create command buffer: {0}", i);
+            }
+        }
+
+        constexpr uint32_t framesInFlight = 3;
+
+        imageAvailableSemaphores_.resize(framesInFlight);
+        renderFinishedSemaphores_.resize(framesInFlight);
+        VkSemaphoreCreateInfo semaphoreCreateInfo{};
+        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+        for (uint32_t i = 0; i < framesInFlight; i++)
+        {
+            result = vkCreateSemaphore(vulkanDevice, &semaphoreCreateInfo, nullptr, &imageAvailableSemaphores_[i]);
+            DBG_ASSERT(result == VK_SUCCESS, "Failed to create image semaphore: {0}", i);
+
+            result = vkCreateSemaphore(vulkanDevice, &semaphoreCreateInfo, nullptr, &renderFinishedSemaphores_[i]);
+            DBG_ASSERT(result == VK_SUCCESS, "Failed to create render semaphore: {0}", i);
+        }
+
+        VkFenceCreateInfo fenceCreateInfo{};
+        fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+        waitFences_.resize(framesInFlight);
+        for (auto& fence : waitFences_)
+        {
+            result = vkCreateFence(vulkanDevice, &fenceCreateInfo, nullptr, &fence);
+            DBG_ASSERT(result == VK_SUCCESS, "Failed to create fence");
+        }
+
+        VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        VkFormat depthFormat = device_->PhysicalDevice()->DepthFormat();
+
+        // render pass
+        VkAttachmentDescription colorAttachmentDesc{};
+        colorAttachmentDesc.format = colorFormat_;
+        colorAttachmentDesc.samples = VK_SAMPLE_COUNT_1_BIT;
+        colorAttachmentDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        colorAttachmentDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorAttachmentDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        colorAttachmentDesc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        colorAttachmentDesc.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+        VkAttachmentReference colorReference{};
+        colorReference.attachment = 0;
+        colorReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkAttachmentReference depthReference{};
+        depthReference.attachment = 1;
+        depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        VkSubpassDescription subpassDesc{};
+        subpassDesc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpassDesc.colorAttachmentCount = 1;
+        subpassDesc.pColorAttachments = &colorReference;
+        subpassDesc.inputAttachmentCount = 0;
+        subpassDesc.pInputAttachments = nullptr;
+        subpassDesc.preserveAttachmentCount = 0;
+        subpassDesc.pPreserveAttachments = nullptr;
+        subpassDesc.pResolveAttachments = nullptr;
+
+        VkSubpassDependency dependency{};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.srcAccessMask = 0;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+        VkRenderPassCreateInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount = 1;
+        renderPassInfo.pAttachments = &colorAttachmentDesc;
+        renderPassInfo.subpassCount = 1;
+        renderPassInfo.pSubpasses = &subpassDesc;
+        renderPassInfo.dependencyCount = 1;
+        renderPassInfo.pDependencies = &dependency;
+
+        result = vkCreateRenderPass(vulkanDevice, &renderPassInfo, nullptr, &renderPass_);
+        DBG_ASSERT(result == VK_SUCCESS, "Failed to create render pass");
+
+        VkFramebufferCreateInfo framebufferCreateInfo{};
+        framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferCreateInfo.renderPass = renderPass_;
+        framebufferCreateInfo.attachmentCount = 1;
+        framebufferCreateInfo.width = width_;
+        framebufferCreateInfo.height = height_;
+        framebufferCreateInfo.layers = 1;
+
+        framebuffers_.resize(imageCount_);
+        for (uint32_t i = 0; i < imageCount_; i++)
+        {
+            framebufferCreateInfo.pAttachments = &images_[i].imageView;
+            result = vkCreateFramebuffer(vulkanDevice, &framebufferCreateInfo, nullptr, &framebuffers_[i]);
+            DBG_ASSERT(result == VK_SUCCESS, "Failed to create framebuffer: {0}", i);
+        }
+    }
+
+    VulkanSwapchain::~VulkanSwapchain()
+    {
+        device_->Idle();
+
+        VkDevice device = device_->NativeVulkanDevice();
+
+        if (swapchain_)
+            fpDestroySwapchainKHR(device, swapchain_, nullptr);
+    }
+
     static void LoadVkFunctionPointers(VkInstance instance, VkDevice device)
     {
         GET_DEVICE_PROC_ADDR(device, CreateSwapchainKHR);
@@ -43,21 +329,16 @@ namespace flux
         GET_INSTANCE_PROC_ADDR(instance, GetPhysicalDeviceSurfacePresentModesKHR);
     }
 
-    VulkanSwapchain::VulkanSwapchain(VkInstance instance, const Ref<VulkanDevice>& device, VkSurfaceKHR surface, VulkanSwapchainCreateProps& props)
-        : instance_(instance), device_(device), surface_(surface), queueFamilyIndex_(std::numeric_limits<uint32_t>::max())
+    static void FindQueueFamilyIndex(uint32_t& graphicsFamilyIndex, uint32_t& presentFamilyIndex, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface)
     {
-        LoadVkFunctionPointers(instance, device_->NativeVulkanDevice());
-
-        VkPhysicalDevice physicalDevice = device->PhysicalDevice()->NativePhysicalDevice();
-
         uint32_t queueFamilyCount;
         vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
 
         std::vector<VkQueueFamilyProperties> queueFamilyProps(queueFamilyCount);
         vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilyProps.data());
 
-        uint32_t graphicsFamilyIndex = std::numeric_limits<uint32_t>::max();
-        uint32_t presentFamilyIndex = std::numeric_limits<uint32_t>::max();
+        graphicsFamilyIndex = std::numeric_limits<uint32_t>::max();
+        presentFamilyIndex = std::numeric_limits<uint32_t>::max();
 
         for (uint32_t i = 0; i < queueFamilyCount; i++)
         {
@@ -73,44 +354,23 @@ namespace flux
             if (graphicsFamilyIndex != std::numeric_limits<uint32_t>::max() && presentFamilyIndex != std::numeric_limits<uint32_t>::max())
                 break;
         }
-
-        DBG_ASSERT(graphicsFamilyIndex != std::numeric_limits<uint32_t>::max(), "Couldnt find a graphics queue");
-        DBG_ASSERT(graphicsFamilyIndex == presentFamilyIndex, "Flux does not support different queue familes for present and graphics");
-
-        queueFamilyIndex_ = graphicsFamilyIndex;
-
-        FindImageFormatAndColorSpace();
-
-
     }
 
-    VulkanSwapchain::~VulkanSwapchain()
+    static void FindImageFormatAndColorSpace(VkFormat& colorFormat, VkColorSpaceKHR& colorSpace, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface)
     {
-        device_->Idle();
-
-        VkDevice device = device_->NativeVulkanDevice();
-
-        if (swapchain_)
-            fpDestroySwapchainKHR(device, swapchain_, nullptr);
-    }
-
-    void VulkanSwapchain::FindImageFormatAndColorSpace()
-    {
-        VkPhysicalDevice physicalDevice = device_->PhysicalDevice()->NativePhysicalDevice();
-
         uint32_t formatCount;
-        VkResult result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface_, &formatCount, nullptr);
+        VkResult result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr);
 
         DBG_ASSERT(result == VK_SUCCESS && formatCount > 0, "Physical device format count retrieval failed");
 
         std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
-        result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface_, &formatCount, surfaceFormats.data());
+        result = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats.data());
         DBG_ASSERT(result == VK_SUCCESS, "Surface fomat retrieval count");
 
         if ((formatCount == 1) && (surfaceFormats[0].format == VK_FORMAT_UNDEFINED))
         {
-            colorFormat_ = VK_FORMAT_B8G8R8A8_UNORM;
-            colorSpace_ = surfaceFormats[0].colorSpace;
+            colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
+            colorSpace = surfaceFormats[0].colorSpace;
         }
         else
         {
@@ -119,8 +379,8 @@ namespace flux
             {
                 if (surfaceFormat.format == VK_FORMAT_B8G8R8A8_UNORM)
                 {
-                    colorFormat_ = surfaceFormat.format;
-                    colorSpace_ = surfaceFormat.colorSpace;
+                    colorFormat = surfaceFormat.format;
+                    colorSpace = surfaceFormat.colorSpace;
                     found_B8G8R8A8_UNORM = true;
                     break;
                 }
@@ -128,8 +388,8 @@ namespace flux
 
             if (!found_B8G8R8A8_UNORM)
             {
-                colorFormat_ = surfaceFormats[0].format;
-                colorSpace_ = surfaceFormats[0].colorSpace;
+                colorFormat = surfaceFormats[0].format;
+                colorSpace = surfaceFormats[0].colorSpace;
             }
         }
     }

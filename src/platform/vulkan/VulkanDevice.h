@@ -19,6 +19,8 @@ namespace flux
         const Ref<VulkanPhysicalDevice>& PhysicalDevice() const { return physicalDevice_; }
         VkDevice NativeVulkanDevice() const { return logicalDevice_; }
 
+        const Ref<VulkanCommandPool> CommandPool() const { return commandPool_; }
+
         void Idle() const;
 
     private:

@@ -12,7 +12,7 @@ namespace flux
         VkCommandPoolCreateInfo poolCreateInfo{};
         poolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         poolCreateInfo.queueFamilyIndex = queueFamilyIndex;
-        poolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        poolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 
         VkResult result = vkCreateCommandPool(logicalDevice_, &poolCreateInfo, nullptr, &commandPool_);
         DBG_ASSERT(result == VK_SUCCESS, "Failed to create command pool");

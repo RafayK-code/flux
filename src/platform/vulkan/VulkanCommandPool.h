@@ -13,7 +13,10 @@ namespace flux
         VulkanCommandPool(VkDevice device, uint32_t queueFamilyIndex);
         ~VulkanCommandPool();
 
-        VkCommandBuffer AllocateCommandBuffer(bool begin) const;
+        VkCommandBuffer AllocateCommandBuffer() const;
+        std::vector<VkCommandBuffer> AllocateCommandBuffer(uint32_t count) const;
+
+        void BeginCommandBuffer(VkCommandBuffer commandBuffer) const;
         void FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue) const;
 
         VkCommandPool CommandPool() const { return commandPool_; }

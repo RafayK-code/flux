@@ -52,6 +52,7 @@ namespace flux
         inline Mode GetMode() const { return data_.mode; }
 
         inline GLFWwindow* GetNativePtr() const { return window_; }
+        inline const Ref<GraphicsContext> Context() const { return context_; }
 
     private:
         GLFWwindow* window_;

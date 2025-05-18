@@ -3,6 +3,7 @@
 #include <flux/renderer/GraphicsContext.h>
 #include <platform/vulkan/VulkanDevice.h>
 #include <platform/vulkan/VulkanSwapchain.h>
+#include <platform/vulkan/VulkanPipeline.h>
 
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
@@ -30,6 +31,7 @@ namespace flux
         static inline VulkanAllocator& Allocator() { return *allocator_; }
           
         inline VkSurfaceKHR Surface() const { return surface_; }
+        inline const Ref<VulkanSwapchain>& Swapchain() const { return swapchain_; }
 
     private:
         void CreateInstance();
@@ -45,5 +47,8 @@ namespace flux
         VkSurfaceKHR surface_;
         GLFWwindow* windowHandle_;
         Ref<VulkanSwapchain> swapchain_;
+
+        // def does NOT belong here. Purely for testing
+        //Ref<VulkanPipeline> pipeline_;
     };
 }

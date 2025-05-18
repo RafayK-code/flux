@@ -17,6 +17,8 @@
     DBG_ASSERT(flux::fp##entrypoint, "");                                     \
 }
 
+constexpr uint32_t FRAMES_IN_FLIGHT = 3;
+
 namespace flux
 {
     static PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
@@ -192,8 +194,6 @@ namespace flux
             DBG_ASSERT(result == VK_SUCCESS, "Failed to create image view: {0}", i);
         }
 
-        constexpr uint32_t framesInFlight = 3;
-
         VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         VkFormat depthFormat = device_->PhysicalDevice()->DepthFormat();
 
@@ -256,12 +256,12 @@ namespace flux
             DBG_ASSERT(result == VK_SUCCESS, "Failed to create framebuffer: {0}", i);
         }
 
-        imageAvailableSemaphores_.resize(framesInFlight);
-        renderFinishedSemaphores_.resize(framesInFlight);
+        imageAvailableSemaphores_.resize(FRAMES_IN_FLIGHT);
+        renderFinishedSemaphores_.resize(FRAMES_IN_FLIGHT);
         VkSemaphoreCreateInfo semaphoreCreateInfo{};
         semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-        for (uint32_t i = 0; i < framesInFlight; i++)
+        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
         {
             result = vkCreateSemaphore(vulkanDevice, &semaphoreCreateInfo, nullptr, &imageAvailableSemaphores_[i]);
             DBG_ASSERT(result == VK_SUCCESS, "Failed to create image semaphore: {0}", i);
@@ -274,8 +274,10 @@ namespace flux
         fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        waitFences_.resize(framesInFlight);
-        for (auto& fence : waitFences_)
+        inFlightFences_.resize(FRAMES_IN_FLIGHT);
+        imagesInFlight_.resize(imageCount_);
+
+        for (auto& fence : inFlightFences_)
         {
             result = vkCreateFence(vulkanDevice, &fenceCreateInfo, nullptr, &fence);
             DBG_ASSERT(result == VK_SUCCESS, "Failed to create fence");
@@ -305,12 +307,70 @@ namespace flux
         if (swapchain_)
             fpDestroySwapchainKHR(device, swapchain_, nullptr);
 
-        for (uint32_t i = 0; i < 3; i++)
+        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
         {
             vkDestroySemaphore(device, renderFinishedSemaphores_[i], nullptr);
             vkDestroySemaphore(device, imageAvailableSemaphores_[i], nullptr);
-            vkDestroyFence(device, waitFences_[i], nullptr);
+            vkDestroyFence(device, inFlightFences_[i], nullptr);
         }
+    }
+
+    uint32_t VulkanSwapchain::AcquireNextImage()
+    {
+        //currentFrameIndex_ = (currentFrameIndex_ + 1) % FRAMES_IN_FLIGHT;
+
+        VkResult result = vkWaitForFences(device_->NativeVulkanDevice(), 1, &inFlightFences_[currentFrameIndex_], VK_TRUE, std::numeric_limits<uint64_t>::max());
+        DBG_ASSERT(result == VK_SUCCESS, "");
+
+        uint32_t imageIndex;
+        result = fpAcquireNextImageKHR(device_->NativeVulkanDevice(), swapchain_, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphores_[currentFrameIndex_], nullptr, &imageIndex);
+
+        if (result != VK_SUCCESS)
+        {
+            DBG_ASSERT(false, "");  // supposed to recreate swapchain here and test again
+        }
+
+        currentImageIndex_ = imageIndex;
+        return imageIndex;
+    }
+
+    void VulkanSwapchain::Present(const VkCommandBuffer* commandBuffers)
+    {
+        VkDevice device = device_->NativeVulkanDevice();
+
+        if (imagesInFlight_[currentImageIndex_] != nullptr)
+            vkWaitForFences(device, 1, &imagesInFlight_[currentImageIndex_], VK_TRUE, std::numeric_limits<uint64_t>::max());
+
+        imagesInFlight_[currentImageIndex_] = inFlightFences_[currentFrameIndex_];
+
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = &imageAvailableSemaphores_[currentFrameIndex_];
+        submitInfo.pWaitDstStageMask = waitStages;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = commandBuffers;
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = &renderFinishedSemaphores_[currentFrameIndex_];
+
+        vkResetFences(device, 1, &inFlightFences_[currentFrameIndex_]);
+        VkResult result = vkQueueSubmit(device_->GraphicQueue(), 1, &submitInfo, inFlightFences_[currentFrameIndex_]);
+        DBG_ASSERT(result == VK_SUCCESS, "");
+
+        VkPresentInfoKHR presentInfo{};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        presentInfo.waitSemaphoreCount = 1;
+        presentInfo.pWaitSemaphores = &renderFinishedSemaphores_[currentFrameIndex_];
+        presentInfo.swapchainCount = 1;
+        presentInfo.pSwapchains = &swapchain_;
+        presentInfo.pImageIndices = &currentImageIndex_;
+
+        result = fpQueuePresentKHR(device_->GraphicQueue(), &presentInfo);
+        DBG_ASSERT(result == VK_SUCCESS, "");
+
+        currentFrameIndex_ = (currentFrameIndex_ + 1) % FRAMES_IN_FLIGHT;
     }
 
     static void LoadVkFunctionPointers(VkInstance instance, VkDevice device)

@@ -25,12 +25,13 @@ namespace flux
         inline uint32_t Width() const { return width_; }
         inline uint32_t Height() const { return height_; }
 
-        inline VkRenderPass RenderPass() const { renderPass_; }
+        inline VkRenderPass RenderPass() const { return renderPass_; }
 
         inline VkFramebuffer GetFramebuffer(uint32_t index) { return framebuffers_[index]; }
         inline VkFramebuffer CurrentFramebuffer() { return framebuffers_[currentImageIndex_]; }
 
         uint32_t AcquireNextImage();
+        void Present(const VkCommandBuffer* commandBuffers);
 
     private:
         VkInstance instance_;
@@ -66,7 +67,8 @@ namespace flux
         std::vector<VkSemaphore> imageAvailableSemaphores_;
         std::vector<VkSemaphore> renderFinishedSemaphores_;
 
-        std::vector<VkFence> waitFences_;
+        std::vector<VkFence> imagesInFlight_;
+        std::vector<VkFence> inFlightFences_;
 
         VkRenderPass renderPass_;
         uint32_t currentFrameIndex_;
@@ -77,5 +79,7 @@ namespace flux
         bool vsync_;
 
         VkSurfaceKHR surface_;
+
+        friend class VulkanContext;
     };
 }

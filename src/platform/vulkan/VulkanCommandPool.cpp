@@ -50,6 +50,7 @@ namespace flux
         allocateInfo.commandBufferCount = count;
 
         VkResult result = vkAllocateCommandBuffers(logicalDevice_, &allocateInfo, commandBuffers.data());
+        DBG_ASSERT(result == VK_SUCCESS, "Failed to create command buffer");
 
         return commandBuffers;
     }

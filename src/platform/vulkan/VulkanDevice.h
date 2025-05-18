@@ -13,7 +13,7 @@ namespace flux
 
         VkQueue GraphicQueue() const { return graphicsQueue_; }
 
-        VkCommandBuffer CommandBuffer(bool begin);
+        VkCommandBuffer AllocateCommandBuffer();
         void FlushCommandBuffer(VkCommandBuffer commandBuffer);
 
         const Ref<VulkanPhysicalDevice>& PhysicalDevice() const { return physicalDevice_; }

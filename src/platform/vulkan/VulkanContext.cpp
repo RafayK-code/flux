@@ -24,6 +24,7 @@ namespace flux
     Ref<VulkanDevice> VulkanContext::device_ = nullptr;
     Ref<VulkanPhysicalDevice> VulkanContext::physicalDevice_ = nullptr;;
     VkDebugUtilsMessengerEXT VulkanContext::debugUtilsMessenger_ = nullptr;
+    Scope<VulkanAllocator> VulkanContext::allocator_ = nullptr;
 
     VulkanContext::VulkanContext(GLFWwindow* window)
         : surface_(nullptr), windowHandle_(window)
@@ -42,6 +43,7 @@ namespace flux
         if (vulkanContextCount == 0)
         {
             CreateDevice();
+            allocator_ = CreateScope<VulkanAllocator>(vulkanInstance_, device_);
         }
 
         int width, height;
@@ -64,6 +66,7 @@ namespace flux
 
         if (vulkanContextCount == 0)
         {
+            allocator_.reset();
             device_.reset();
 
             if (debugUtilsMessenger_)

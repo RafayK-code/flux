@@ -54,9 +54,9 @@ namespace flux
         vkDestroyDevice(logicalDevice_, nullptr);
     }
 
-    VkCommandBuffer VulkanDevice::CommandBuffer(bool begin)
+    VkCommandBuffer VulkanDevice::AllocateCommandBuffer()
     {
-        return commandPool_->AllocateCommandBuffer(begin);
+        return commandPool_->AllocateCommandBuffer();
     }
 
     void VulkanDevice::FlushCommandBuffer(VkCommandBuffer commandBuffer)

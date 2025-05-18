@@ -20,8 +20,17 @@ namespace flux
         VulkanSwapchain(VkInstance instance, const Ref<VulkanDevice>& device, VkSurfaceKHR surface, VulkanSwapchainCreateProps& props);
         ~VulkanSwapchain();
 
-        void BeginFrame();
-        void Present();
+        inline uint32_t ImageCount() const { return imageCount_; }
+
+        inline uint32_t Width() const { return width_; }
+        inline uint32_t Height() const { return height_; }
+
+        inline VkRenderPass RenderPass() const { renderPass_; }
+
+        inline VkFramebuffer GetFramebuffer(uint32_t index) { return framebuffers_[index]; }
+        inline VkFramebuffer CurrentFramebuffer() { return framebuffers_[currentImageIndex_]; }
+
+        uint32_t AcquireNextImage();
 
     private:
         VkInstance instance_;
@@ -42,26 +51,17 @@ namespace flux
             VkImageView imageView = nullptr;
         };
 
-        std::vector<SwapchainImage> images_;
-
-        struct DepthStencilAttachment
+        struct DepthImage
         {
             VkImage image = nullptr;
             VmaAllocation memoryAlloc = nullptr;
             VkImageView imageView = nullptr;
         };
 
-        DepthStencilAttachment depthStencil_;
+        std::vector<SwapchainImage> images_;
+        std::vector<DepthImage> depthImages_;
 
         std::vector<VkFramebuffer> framebuffers_;
-
-        struct SwapchainCommandBuffer
-        {
-            VkCommandPool commandPool = nullptr;
-            VkCommandBuffer commandBuffer = nullptr;
-        };
-
-        std::vector<SwapchainCommandBuffer> commandBuffers_;
 
         std::vector<VkSemaphore> imageAvailableSemaphores_;
         std::vector<VkSemaphore> renderFinishedSemaphores_;

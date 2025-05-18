@@ -5,21 +5,12 @@
 
 namespace flux
 {
-    struct VulkanAllocatorData
-    {
-        VmaAllocator allocator;
-        uint64_t totalAllocatedBytes = 0;
-        uint64_t memUsage = 0;
-    };
-
     enum class AllocationType : uint8_t
     {
         None = 0,
         Buffer = 1,
         Image = 2,
     };
-
-    static VulkanAllocatorData* data = nullptr;
 
     struct AllocInfo
     {
@@ -29,34 +20,20 @@ namespace flux
 
     static std::map<VmaAllocation, AllocInfo> allocationMap;
 
-    VulkanAllocator::VulkanAllocator(const std::string& tag)
-        : tag_(tag)
+    VulkanAllocator::VulkanAllocator(VkInstance instance, const Ref<VulkanDevice>& device)
     {
-    }
-
-    void VulkanAllocator::Init(VkInstance instance, const Ref<VulkanDevice>& device)
-    {
-        data = new VulkanAllocatorData();
-
         VmaAllocatorCreateInfo allocatorInfo{};
         allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
         allocatorInfo.physicalDevice = device->PhysicalDevice()->NativePhysicalDevice();
         allocatorInfo.device = device->NativeVulkanDevice();
         allocatorInfo.instance = instance;
 
-        vmaCreateAllocator(&allocatorInfo, &data->allocator);
+        vmaCreateAllocator(&allocatorInfo, &allocator_);
     }
 
-    void VulkanAllocator::Shutdown()
+    VulkanAllocator::~VulkanAllocator()
     {
-        vmaDestroyAllocator(data->allocator);
-        delete data;
-        data = nullptr;
-    }
-
-    VmaAllocator& VulkanAllocator::GetVmaAllocator()
-    {
-        return data->allocator;
+        vmaDestroyAllocator(allocator_);
     }
 
     VmaAllocation VulkanAllocator::AllocateBuffer(VkBufferCreateInfo bufferCreateInfo, VmaMemoryUsage usage, VkBuffer& outBuffer)
@@ -67,15 +44,15 @@ namespace flux
         allocCreateInfo.usage = usage;
 
         VmaAllocation allocation;
-        vmaCreateBuffer(data->allocator, &bufferCreateInfo, &allocCreateInfo, &outBuffer, &allocation, nullptr);
+        vmaCreateBuffer(allocator_, &bufferCreateInfo, &allocCreateInfo, &outBuffer, &allocation, nullptr);
         if (allocation == nullptr)
         {
             DBG_ERROR("Failed to allocate GPU buffer: requested size = {0}", 0);    // fill in with bytes
         }
 
         VmaAllocationInfo allocInfo{};
-        vmaGetAllocationInfo(data->allocator, allocation, &allocInfo);
-        DBG_WARN("VulkanAllocator ({0}): allocating buffer; size = {1}", tag_, 0);   // fill in with bytes
+        vmaGetAllocationInfo(allocator_, allocation, &allocInfo);
+        DBG_WARN("VulkanAllocator: allocating buffer; size = {0}", 0);   // fill in with bytes
 
         return allocation;
     }
@@ -86,36 +63,36 @@ namespace flux
         allocCreateInfo.usage = usage;
 
         VmaAllocation allocation;
-        vmaCreateImage(data->allocator, &imageCreateInfo, &allocCreateInfo, &outImage, &allocation, nullptr);
+        vmaCreateImage(allocator_, &imageCreateInfo, &allocCreateInfo, &outImage, &allocation, nullptr);
         if (allocation == nullptr)
         {
             DBG_ERROR("Failed to allocate GPU image: requested size = {0}x{1}x{2}", imageCreateInfo.extent.width, imageCreateInfo.extent.height, imageCreateInfo.extent.depth);
         }
 
         VmaAllocationInfo allocInfo{};
-        vmaGetAllocationInfo(data->allocator, allocation, &allocInfo);
-        DBG_WARN("VulkanAllocator ({0}): allocating buffer; size = {1}", tag_, 0);   // fill in with bytes
+        vmaGetAllocationInfo(allocator_, allocation, &allocInfo);
+        DBG_WARN("VulkanAllocator: allocating buffer; size = {0}", 0);   // fill in with bytes
 
         return allocation;
     }
 
     void VulkanAllocator::Free(VmaAllocation allocation)
     {
-        vmaFreeMemory(data->allocator, allocation);
+        vmaFreeMemory(allocator_, allocation);
     }
 
     void VulkanAllocator::DestroyBuffer(VkBuffer buffer, VmaAllocation allocation)
     {
-        vmaDestroyBuffer(data->allocator, buffer, allocation);
+        vmaDestroyBuffer(allocator_, buffer, allocation);
     }
 
     void VulkanAllocator::DestroyImage(VkImage image, VmaAllocation allocation)
     {
-        vmaDestroyImage(data->allocator, image, allocation);
+        vmaDestroyImage(allocator_, image, allocation);
     }
 
     void VulkanAllocator::UnmapMemory(VmaAllocation allocation)
     {
-        vmaUnmapMemory(data->allocator, allocation);
+        vmaUnmapMemory(allocator_, allocation);
     }
 }

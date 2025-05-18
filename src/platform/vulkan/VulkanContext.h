@@ -26,8 +26,9 @@ namespace flux
         static void PreWindowCreateHints();
 
         static inline VkInstance Instance() { return vulkanInstance_; }
-        static inline const Ref<VulkanDevice> Device() { return device_; }
-
+        static inline const Ref<VulkanDevice>& Device() { return device_; }
+        static inline VulkanAllocator& Allocator() { return *allocator_; }
+          
         inline VkSurfaceKHR Surface() const { return surface_; }
 
     private:
@@ -39,6 +40,7 @@ namespace flux
         static Ref<VulkanDevice> device_;
         static Ref<VulkanPhysicalDevice> physicalDevice_;
         static VkDebugUtilsMessengerEXT debugUtilsMessenger_;
+        static Scope<VulkanAllocator> allocator_;
 
         VkSurfaceKHR surface_;
         GLFWwindow* windowHandle_;

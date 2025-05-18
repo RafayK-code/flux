@@ -17,6 +17,7 @@ namespace flux
         std::vector<VkCommandBuffer> AllocateCommandBuffer(uint32_t count) const;
 
         void BeginCommandBuffer(VkCommandBuffer commandBuffer) const;
+
         void FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue) const;
 
         VkCommandPool CommandPool() const { return commandPool_; }

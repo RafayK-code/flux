@@ -78,3 +78,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC glad)
 target_link_libraries(${PROJECT_NAME} PUBLIC spdlog)
 target_link_libraries(${PROJECT_NAME} PUBLIC vma)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Vulkan_LIBRARIES})
+
+add_dependencies(${PROJECT_NAME} spirv-shaders)

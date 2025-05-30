@@ -94,4 +94,14 @@ namespace flux
         vkDestroyFence(logicalDevice_, fence, nullptr);
         vkFreeCommandBuffers(logicalDevice_, commandPool_, 1, &commandBuffer);
     }
+
+    void VulkanCommandPool::FreeCommandBuffer(VkCommandBuffer commandBuffer) const
+    {
+        vkFreeCommandBuffers(logicalDevice_, commandPool_, 1, &commandBuffer);
+    }
+
+    void VulkanCommandPool::FreeCommandBuffer(const std::vector<VkCommandBuffer>& commandBuffers) const
+    {
+        vkFreeCommandBuffers(logicalDevice_, commandPool_, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+    }
 }

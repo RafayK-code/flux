@@ -20,6 +20,9 @@ namespace flux
 
         void FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue) const;
 
+        void FreeCommandBuffer(VkCommandBuffer commandBuffer) const;
+        void FreeCommandBuffer(const std::vector<VkCommandBuffer>& commandBuffers) const;
+
         VkCommandPool CommandPool() const { return commandPool_; }
 
     private:

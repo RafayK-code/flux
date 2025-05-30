@@ -7,10 +7,16 @@
 
 namespace flux
 {
-    class VulkanCommandBuffer : public RefCounted
+    /**
+    * For now, this is a non-owning reference to a command buffer
+    * 
+    * This may change
+    */
+    class VulkanCommandBuffer
     {
     public:
         VulkanCommandBuffer(VkCommandBuffer commandBuffer);
+        ~VulkanCommandBuffer();
 
         void Begin();
         void End();

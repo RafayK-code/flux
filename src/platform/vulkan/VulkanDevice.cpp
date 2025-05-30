@@ -54,12 +54,12 @@ namespace flux
         vkDestroyDevice(logicalDevice_, nullptr);
     }
 
-    VkCommandBuffer VulkanDevice::AllocateCommandBuffer()
+    VkCommandBuffer VulkanDevice::AllocateCommandBuffer() const
     {
         return commandPool_->AllocateCommandBuffer();
     }
 
-    void VulkanDevice::FlushCommandBuffer(VkCommandBuffer commandBuffer)
+    void VulkanDevice::FlushCommandBuffer(VkCommandBuffer commandBuffer) const
     {
         return commandPool_->FlushCommandBuffer(commandBuffer, graphicsQueue_);
     }

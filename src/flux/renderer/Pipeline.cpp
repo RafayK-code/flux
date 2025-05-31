@@ -12,6 +12,7 @@ namespace flux
         switch (RendererAPI::Current())
         {
         case RendererAPI::Type::Vulkan: return CreateRef<VulkanPipeline>(specification);
+        case RendererAPI::Type::OpenGL: return nullptr;
         }
 
         DBG_ASSERT(false, "Invalid renderer API");

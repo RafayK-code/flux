@@ -15,7 +15,7 @@ namespace flux
         case RendererAPI::Type::OpenGL: return nullptr;
         }
 
-        DBG_ASSERT(false, "unrecognized renderer api");
+        DBG_ASSERT(false, "unrecognized renderer API");
         return nullptr;
     }
 }

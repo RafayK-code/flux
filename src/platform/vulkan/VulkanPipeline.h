@@ -13,7 +13,7 @@ namespace flux
     {
     public:
         VulkanPipeline(const PipelineSpecification& specification, VkRenderPass renderPass = nullptr, uint32_t subpass = 0);
-        ~VulkanPipeline();
+        virtual ~VulkanPipeline();
 
         void Bind(VkCommandBuffer commandBuffer) const;
 

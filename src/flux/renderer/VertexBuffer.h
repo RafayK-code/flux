@@ -66,8 +66,8 @@ namespace flux
             Dynamic,
         };
 
-        static Ref<VertexBuffer> Create(float* vertices, uint32_t size, Usage usage = Usage::Static);
-        static Ref<VertexBuffer> Create(uint32_t size, Usage usage = Usage::Dynamic);
+        static Ref<VertexBuffer> Create(void* vertices, uint64_t size, Usage usage = Usage::Static);
+        static Ref<VertexBuffer> Create(uint64_t size, Usage usage = Usage::Dynamic);
 
         virtual ~VertexBuffer() = default;
 
@@ -75,5 +75,6 @@ namespace flux
         virtual void Unbind() const = 0;
 
         virtual void SetData(const void* data, uint64_t size, uint64_t offset = 0) = 0;
+        virtual uint64_t Size() const = 0;
     };
 }

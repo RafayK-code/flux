@@ -11,7 +11,5 @@ namespace flux
         static Ref<RenderPass> Create();
 
         virtual ~RenderPass() = default;
-
-        virtual 
     };
 }

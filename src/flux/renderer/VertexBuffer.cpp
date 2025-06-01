@@ -3,6 +3,8 @@
 #include <flux/renderer/VertexBuffer.h>
 #include <flux/renderer/RendererAPI.h>
 
+#include <platform/vulkan/VulkanVertexBuffer.h>
+
 namespace flux
 {
     uint32_t ShaderDataTypeSize(ShaderDataType type)
@@ -77,11 +79,11 @@ namespace flux
         }
     }
 
-    Ref<VertexBuffer> VertexBuffer::Create(void* vertices, uint64_t size, Usage usage)
+    Ref<VertexBuffer> VertexBuffer::Create(const void* vertices, uint64_t size, Usage usage)
     {
         switch (RendererAPI::Current())
         {
-        case RendererAPI::Type::Vulkan: return nullptr;
+        case RendererAPI::Type::Vulkan: return CreateRef<VulkanVertexBuffer>(vertices, size, usage);
         case RendererAPI::Type::OpenGL: return nullptr;
         }
 
@@ -93,7 +95,7 @@ namespace flux
     {
         switch (RendererAPI::Current())
         {
-        case RendererAPI::Type::Vulkan: return nullptr;
+        case RendererAPI::Type::Vulkan: return CreateRef<VulkanVertexBuffer>(size, usage);
         case RendererAPI::Type::OpenGL: return nullptr;
         }
 

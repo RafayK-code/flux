@@ -6,7 +6,7 @@
 
 namespace flux
 {
-    VulkanVertexBuffer::VulkanVertexBuffer(void* vertices, uint64_t size, Usage usage)
+    VulkanVertexBuffer::VulkanVertexBuffer(const void* vertices, uint64_t size, Usage usage)
         : size_(size)
     {
         VkBufferCreateInfo bufferInfo{};

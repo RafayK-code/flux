@@ -66,7 +66,7 @@ namespace flux
             Dynamic,
         };
 
-        static Ref<VertexBuffer> Create(void* vertices, uint64_t size, Usage usage = Usage::Static);
+        static Ref<VertexBuffer> Create(const void* vertices, uint64_t size, Usage usage = Usage::Static);
         static Ref<VertexBuffer> Create(uint64_t size, Usage usage = Usage::Dynamic);
 
         virtual ~VertexBuffer() = default;

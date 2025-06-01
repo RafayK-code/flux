@@ -11,7 +11,7 @@ namespace flux
     class VulkanVertexBuffer : public VertexBuffer
     {
     public:
-        VulkanVertexBuffer(void* vertices, uint64_t size, Usage usage = Usage::Static);
+        VulkanVertexBuffer(const void* vertices, uint64_t size, Usage usage = Usage::Static);
         VulkanVertexBuffer(uint64_t size, Usage usage = Usage::Dynamic);
 
         virtual ~VulkanVertexBuffer();

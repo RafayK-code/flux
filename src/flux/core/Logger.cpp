@@ -6,7 +6,7 @@
 
 namespace flux
 {
-    static constexpr const char* PATTERN = "[%10n] [%^%4!l%$] [%-20s:%5#] %v";
+    static constexpr const char* PATTERN = "[%10n] [%^%4!l%$] [%-30s:%5#] %v";
 
     Logger::Logger(const std::string& clientName)
     {

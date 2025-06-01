@@ -39,7 +39,7 @@ namespace flux
         VulkanContext::Allocator().DestroyBuffer(vulkanBuffer_, allocation_);
     }
 
-    void VulkanVertexBuffer::SetData(const void* data, uint64_t size, uint64_t offset = 0)
+    void VulkanVertexBuffer::SetData(const void* data, uint64_t size, uint64_t offset)
     {
         uint8_t* dst = VulkanContext::Allocator().MapMemory<uint8_t>(allocation_);
         memcpy(dst, (uint8_t*)data + offset, size);

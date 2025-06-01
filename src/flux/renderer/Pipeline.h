@@ -2,6 +2,7 @@
 
 #include <flux/renderer/Shader.h>
 #include <flux/renderer/RenderStates.h>
+#include <flux/renderer/VertexBuffer.h>
 
 namespace flux
 {
@@ -22,6 +23,7 @@ namespace flux
         PrimitiveTopology topology = PrimitiveTopology::Triangles;
         DepthState depthState{};
         BlendState blendState{};
+        VertexBufferLayout layout{};
     };
 
     class Pipeline : public RefCounted

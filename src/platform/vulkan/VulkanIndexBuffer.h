@@ -19,6 +19,8 @@ namespace flux
 
         virtual uint32_t Count() const override { return count_; }
 
+        VkBuffer NativeVulkanBuffer() const { return vulkanBuffer_; }
+
     private:
         VkBuffer vulkanBuffer_;
         VmaAllocation allocation_;

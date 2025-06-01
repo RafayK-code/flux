@@ -3,13 +3,15 @@
 #include <flux/renderer/IndexBuffer.h>
 #include <flux/renderer/RendererAPI.h>
 
+#include <platform/vulkan/VulkanIndexBuffer.h>
+
 namespace flux
 {
     Ref<IndexBuffer> IndexBuffer::Create(const uint32_t* data, uint32_t count)
     {
         switch (RendererAPI::Current())
         {
-        case RendererAPI::Type::Vulkan: return nullptr;
+        case RendererAPI::Type::Vulkan: return CreateRef<VulkanIndexBuffer>(data, count);
         case RendererAPI::Type::OpenGL: return nullptr;
         }
 

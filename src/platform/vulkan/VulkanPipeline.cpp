@@ -10,6 +10,7 @@ namespace flux
     static VkBlendOp FluxBlendOpToVulkan(BlendOp blendOp);
     static VkBlendFactor FluxBlendFactorToVulkan(BlendFactor blendFactor);
     static VkCompareOp FluxDepthCompareOpToVulkan(DepthCompareOp depthOp);
+    static VkFormat FluxShaderDataTypeToVulkan(ShaderDataType type);
 
     VulkanPipeline::VulkanPipeline(const PipelineSpecification& specification, VkRenderPass renderPass, uint32_t subpass)
     {
@@ -37,12 +38,32 @@ namespace flux
         shaderStages[1].pNext = nullptr;
         shaderStages[1].pSpecializationInfo = nullptr;
 
+        // vertex attributes and layout
+        VkVertexInputBindingDescription bindingDescription{};
+        bindingDescription.binding = 0;
+        bindingDescription.stride = specification_.layout.Stride();
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+        uint32_t location = 0;
+
+        for (const auto& element : specification_.layout.Elements())
+        {
+            VkVertexInputAttributeDescription attributeDescription{};
+            attributeDescription.binding = 0;
+            attributeDescription.location = location++;
+            attributeDescription.format = FluxShaderDataTypeToVulkan(element.type);
+            attributeDescription.offset = static_cast<uint32_t>(element.offset);
+
+            attributeDescriptions.push_back(attributeDescription);
+        }
+
         VkPipelineVertexInputStateCreateInfo vsInputInfo{};
         vsInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vsInputInfo.vertexAttributeDescriptionCount = 0;
-        vsInputInfo.vertexBindingDescriptionCount = 0;
-        vsInputInfo.pVertexAttributeDescriptions = nullptr;
-        vsInputInfo.pVertexBindingDescriptions = nullptr;
+        vsInputInfo.vertexBindingDescriptionCount = 1;
+        vsInputInfo.pVertexBindingDescriptions = &bindingDescription;
+        vsInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+        vsInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
         // describe the vertex assembly
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
@@ -250,5 +271,27 @@ namespace flux
 
         DBG_ASSERT(false, "Unknown depth compare op type");
         return VK_COMPARE_OP_MAX_ENUM;
+    }
+
+    static VkFormat FluxShaderDataTypeToVulkan(ShaderDataType type)
+    {
+        switch (type)
+        {
+        case ShaderDataType::Float:   return VK_FORMAT_R32_SFLOAT;
+        case ShaderDataType::Float2:  return VK_FORMAT_R32G32_SFLOAT;
+        case ShaderDataType::Float3:  return VK_FORMAT_R32G32B32_SFLOAT;
+        case ShaderDataType::Float4:  return VK_FORMAT_R32G32B32A32_SFLOAT;
+        case ShaderDataType::Int:     return VK_FORMAT_R32_SINT;
+        case ShaderDataType::Int2:    return VK_FORMAT_R32G32_SINT;
+        case ShaderDataType::Int3:    return VK_FORMAT_R32G32B32_SINT;
+        case ShaderDataType::Int4:    return VK_FORMAT_R32G32B32A32_SINT;
+        case ShaderDataType::Bool:    return VK_FORMAT_R8_UINT;
+        case ShaderDataType::Mat3:    // Special case: usually treated as 3 Float3s in separate locations
+        case ShaderDataType::Mat4:    // Special case: treated as 4 Float4s in separate locations
+        default:                      break;
+        }
+
+        DBG_ASSERT(false, "Unknown shader data type");
+        return VK_FORMAT_UNDEFINED;
     }
 }

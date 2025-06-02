@@ -3,13 +3,15 @@
 #include <flux/renderer/Image.h>
 #include <flux/renderer/RendererAPI.h>
 
+#include <platform/vulkan/VulkanImage.h>
+
 namespace flux
 {
     Ref<Image> Image::Create(const ImageSpecification& specification)
     {
         switch (RendererAPI::Current())
         {
-        case RendererAPI::Type::Vulkan: return nullptr;
+        case RendererAPI::Type::Vulkan: return CreateRef<VulkanImage>(specification);
         case RendererAPI::Type::OpenGL: return nullptr;
         }
 
@@ -21,7 +23,7 @@ namespace flux
     {
         switch (RendererAPI::Current())
         {
-        case RendererAPI::Type::Vulkan: return nullptr;
+        case RendererAPI::Type::Vulkan: return CreateRef<VulkanImage>(specification, data, size);
         case RendererAPI::Type::OpenGL: return nullptr;
         }
 

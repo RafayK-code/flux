@@ -24,7 +24,7 @@ namespace flux
         VkShaderModule FragmentShaderModule() const { return fsModule_; }
 
         VkDescriptorSetLayout DescriptorSetLayout() const { return descriptorSetLayout_; }
-        uint32_t DescriptorSetLayoutCount() const { return descriptorSetLayoutCount_; }
+        constexpr uint32_t DescriptorSetLayoutCount() const { return 1; }
 
         VkDescriptorSet DescriptorSet() const { return descriptorSet_; }
 
@@ -33,8 +33,6 @@ namespace flux
         VkShaderModule fsModule_;
 
         VkDescriptorSetLayout descriptorSetLayout_;
-        uint32_t descriptorSetLayoutCount_;
-
         VkDescriptorSet descriptorSet_;
     };
 }

@@ -262,6 +262,7 @@ namespace flux
         case ImageFormat::RG8:                  return VK_FORMAT_R8G8_UNORM;
         case ImageFormat::RG16F:                return VK_FORMAT_R16G16_SFLOAT;
         case ImageFormat::RG32F:                return VK_FORMAT_R32G32_SFLOAT;
+        case ImageFormat::RGB:                  return VK_FORMAT_R8G8B8_UNORM;
         case ImageFormat::RGBA:                 return VK_FORMAT_R8G8B8A8_UNORM;
         case ImageFormat::SRGBA:                return VK_FORMAT_R8G8B8A8_SRGB;
         case ImageFormat::RGBA16F:              return VK_FORMAT_R16G16B16A16_SFLOAT;

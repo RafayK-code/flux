@@ -15,6 +15,7 @@ set(GLFW_PATH ${CMAKE_SOURCE_DIR}/extern/glfw)
 set(GLAD_PATH ${CMAKE_SOURCE_DIR}/extern/glad)
 set(SPDLOG_PATH ${CMAKE_SOURCE_DIR}/extern/spdlog)
 set(VMA_PATH ${CMAKE_SOURCE_DIR}/extern/vma)
+set(STB_PATH ${CMAKE_SOURCE_DIR}/extern/stb)
 
 file(GLOB_RECURSE FLUX_SRC_FILES
     "${FLUX_SRC_PATH}/flux/*.cpp"
@@ -71,12 +72,14 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLAD_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${SPDLOG_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${VMA_PATH}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${STB_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
 target_link_libraries(${PROJECT_NAME} PUBLIC glad)
 target_link_libraries(${PROJECT_NAME} PUBLIC spdlog)
 target_link_libraries(${PROJECT_NAME} PUBLIC vma)
+target_link_libraries(${PROJECT_NAME} PUBLIC stb)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Vulkan_LIBRARIES})
 
 add_dependencies(${PROJECT_NAME} spirv-shaders)

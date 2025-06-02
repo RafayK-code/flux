@@ -40,7 +40,6 @@ namespace flux
         VkResult result = vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout_);
         DBG_ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout");
 
-        descriptorSetLayoutCount_ = static_cast<uint32_t>(layoutBindings.size());
         descriptorSet_ = deviceRef->DescriptorPool()->AllocateDescriptorSet(descriptorSetLayout_);
     }
 

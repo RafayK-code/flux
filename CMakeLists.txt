@@ -80,3 +80,4 @@ target_link_libraries(${PROJECT_NAME} PUBLIC vma)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Vulkan_LIBRARIES})
 
 add_dependencies(${PROJECT_NAME} spirv-shaders)
+add_dependencies(${PROJECT_NAME} copy-images)

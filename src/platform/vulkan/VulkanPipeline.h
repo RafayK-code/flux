@@ -16,6 +16,7 @@ namespace flux
         virtual ~VulkanPipeline();
 
         void Bind(VkCommandBuffer commandBuffer) const;
+        VkPipelineLayout PipelineLayout() const { return pipelineLayout_; }
 
     private:
         VkPipeline pipeline_;

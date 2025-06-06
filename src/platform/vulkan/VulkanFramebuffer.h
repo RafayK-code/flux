@@ -24,7 +24,7 @@ namespace flux
 
         virtual void BindTexture(uint32_t attachmentIndex = 0, uint32_t slot = 0) const override {}
 
-        virtual Ref<Image> GetImage(uint32_t attachmentIndex = 0) const override { return attachmentImages_[attachmentIndex]; }
+        virtual Ref<Image> GetColorImage(uint32_t attachmentIndex = 0) const override { return attachmentImages_[attachmentIndex]; }
         virtual Ref<Image> GetDepthImage() const override { return depthAttachmentImage_; }
 
         virtual size_t GetColorAttachmentCount() const override { return attachmentImages_.size(); }

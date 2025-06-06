@@ -37,7 +37,7 @@ namespace flux
         uint32_t width = 0;
         uint32_t height = 0;
         
-        float depthClearValue = 0.0f;
+        float depthClearValue = 1.0f;
         bool clearColorOnLoad = true;
         bool clearDepthOnLoad = true;
 
@@ -64,7 +64,7 @@ namespace flux
 
         virtual void BindTexture(uint32_t attachmentIndex = 0, uint32_t slot = 0) const = 0;
 
-        virtual Ref<Image> GetImage(uint32_t attachmentIndex = 0) const = 0;
+        virtual Ref<Image> GetColorImage(uint32_t attachmentIndex = 0) const = 0;
         virtual Ref<Image> GetDepthImage() const = 0;
 
         virtual size_t GetColorAttachmentCount() const = 0;

@@ -69,7 +69,7 @@ namespace flux
         virtual void Bind() = 0;
         virtual void Unbind() = 0;
 
-        virtual void PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding) const = 0;
-        virtual void PushSampler(const Ref<Image>& image, uint32_t binding) const = 0;
+        virtual void PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding, uint32_t index = 0) const = 0;
+        virtual void PushSampler(const Ref<Image>& image, uint32_t binding, uint32_t index = 0) const = 0;
     };
 }

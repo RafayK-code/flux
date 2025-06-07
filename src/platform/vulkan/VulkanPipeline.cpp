@@ -3,6 +3,7 @@
 #include <platform/vulkan/VulkanPipeline.h>
 #include <platform/vulkan/VulkanContext.h>
 #include <platform/vulkan/VulkanShader.h>
+#include <platform/vulkan/VulkanFramebuffer.h>
 
 namespace flux
 {
@@ -12,7 +13,7 @@ namespace flux
     static VkCompareOp FluxDepthCompareOpToVulkan(DepthCompareOp depthOp);
     static VkFormat FluxShaderDataTypeToVulkan(ShaderDataType type);
 
-    VulkanPipeline::VulkanPipeline(const PipelineSpecification& specification, VkRenderPass renderPass, uint32_t subpass)
+    VulkanPipeline::VulkanPipeline(const PipelineSpecification& specification, VkRenderPass renderPassOverride)
     {
         specification_ = specification;
         Ref<VulkanDevice> device = VulkanContext::Device();
@@ -179,8 +180,12 @@ namespace flux
         vkCreatePipelineLayout(device->NativeVulkanDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout_);
 
         pipelineInfo.layout = pipelineLayout_;
-        pipelineInfo.renderPass = renderPass;
-        pipelineInfo.subpass = subpass;
+        if (!renderPassOverride)
+            pipelineInfo.renderPass = std::dynamic_pointer_cast<VulkanFramebuffer>(specification_.framebuffer)->NativeVulkanRenderPass();
+        else
+            pipelineInfo.renderPass = renderPassOverride;
+
+        pipelineInfo.subpass = 0;       // will we change this? probably not tbh...
 
         VkResult result = vkCreateGraphicsPipelines(device->NativeVulkanDevice(), nullptr, 1, &pipelineInfo, nullptr, &pipeline_);
 

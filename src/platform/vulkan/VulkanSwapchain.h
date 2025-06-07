@@ -14,6 +14,8 @@ namespace flux
         bool vsync;
     };
 
+    static inline constexpr uint32_t VulkanFramesInFlight() { return 3; }
+
     class VulkanSwapchain
     {
     public:
@@ -32,6 +34,8 @@ namespace flux
 
         uint32_t AcquireNextImage();
         void Present(const VkCommandBuffer* commandBuffers);
+
+        uint32_t CurrentImageIndex() const { return currentImageIndex_; }
 
     private:
         VkInstance instance_;

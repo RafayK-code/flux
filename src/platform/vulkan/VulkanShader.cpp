@@ -40,7 +40,11 @@ namespace flux
         VkResult result = vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout_);
         DBG_ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout");
 
-        descriptorSet_ = deviceRef->DescriptorPool()->AllocateDescriptorSet(descriptorSetLayout_);
+        std::vector<VkDescriptorSetLayout> descriptorSetLayouts(VulkanFramesInFlight());
+        for (uint32_t i = 0; i < VulkanFramesInFlight(); i++)
+            descriptorSetLayouts[i] = descriptorSetLayout_;
+
+        descriptorSets_ = deviceRef->DescriptorPool()->AllocateDescriptorSet(descriptorSetLayouts);
     }
 
     VulkanShader::~VulkanShader()
@@ -48,20 +52,20 @@ namespace flux
         Ref<VulkanDevice> device = VulkanContext::Device();
         device->Idle();
 
-        device->DescriptorPool()->FreeDescriptorSet(descriptorSet_);
+        device->DescriptorPool()->FreeDescriptorSet(descriptorSets_);
         vkDestroyDescriptorSetLayout(device->NativeVulkanDevice(), descriptorSetLayout_, nullptr);
 
         vkDestroyShaderModule(device->NativeVulkanDevice(), vsModule_, nullptr);
         vkDestroyShaderModule(device->NativeVulkanDevice(), fsModule_, nullptr);
     }
 
-    void VulkanShader::PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding) const
+    void VulkanShader::PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding, uint32_t index) const
     {
         Ref<VulkanUniformBuffer> vulkanUb = std::dynamic_pointer_cast<VulkanUniformBuffer>(ub);
 
         VkWriteDescriptorSet write{};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        write.dstSet = descriptorSet_;
+        write.dstSet = descriptorSets_[index];
         write.dstBinding = binding;
         write.dstArrayElement = 0;
         write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -72,13 +76,13 @@ namespace flux
         vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
     }
 
-    void VulkanShader::PushSampler(const Ref<Image>& image, uint32_t binding) const
+    void VulkanShader::PushSampler(const Ref<Image>& image, uint32_t binding, uint32_t index) const
     {
         Ref<VulkanImage> vulkanImage = std::dynamic_pointer_cast<VulkanImage>(image);
 
         VkWriteDescriptorSet write{};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        write.dstSet = descriptorSet_;
+        write.dstSet = descriptorSets_[index];
         write.dstBinding = binding;
         write.dstArrayElement = 0;
         write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;

@@ -14,7 +14,10 @@ namespace flux
         ~VulkanDescriptorPool();
 
         VkDescriptorSet AllocateDescriptorSet(VkDescriptorSetLayout layout) const;
+        std::vector<VkDescriptorSet> AllocateDescriptorSet(const std::vector<VkDescriptorSetLayout>& layouts) const;
+
         void FreeDescriptorSet(VkDescriptorSet descriptorSet) const;
+        void FreeDescriptorSet(const std::vector<VkDescriptorSet>& descriptorSet) const;
 
         VkDescriptorPool NativeDescriptorPool() const { return descriptorPool_; }
 

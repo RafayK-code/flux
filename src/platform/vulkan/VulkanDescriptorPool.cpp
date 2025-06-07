@@ -48,8 +48,28 @@ namespace flux
         return descriptorSet;
     }
 
+    std::vector<VkDescriptorSet> VulkanDescriptorPool::AllocateDescriptorSet(const std::vector<VkDescriptorSetLayout>& layouts) const
+    {
+        VkDescriptorSetAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool = descriptorPool_;
+        allocInfo.descriptorSetCount = static_cast<uint32_t>(layouts.size());
+        allocInfo.pSetLayouts = layouts.data();
+
+        std::vector<VkDescriptorSet> descriptorSets(layouts.size());
+        VkResult result = vkAllocateDescriptorSets(logicalDevice_, &allocInfo, descriptorSets.data());
+
+        DBG_ASSERT(result == VK_SUCCESS, "Failed to allocate descriptor set");
+        return descriptorSets;
+    }
+
     void VulkanDescriptorPool::FreeDescriptorSet(VkDescriptorSet descriptorSet) const
     {
         vkFreeDescriptorSets(logicalDevice_, descriptorPool_, 1, &descriptorSet);
+    }
+
+    void VulkanDescriptorPool::FreeDescriptorSet(const std::vector<VkDescriptorSet>& descriptorSet) const
+    {
+        vkFreeDescriptorSets(logicalDevice_, descriptorPool_, static_cast<uint32_t>(descriptorSet.size()), descriptorSet.data());
     }
 }

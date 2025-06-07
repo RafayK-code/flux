@@ -1,6 +1,7 @@
 #pragma once
 
 #include <flux/renderer/Shader.h>
+#include <flux/renderer/Framebuffer.h>
 #include <flux/renderer/RenderStates.h>
 #include <flux/renderer/VertexBuffer.h>
 
@@ -20,6 +21,7 @@ namespace flux
     struct PipelineSpecification
     {
         Ref<Shader> shader;
+        Ref<Framebuffer> framebuffer;
         PrimitiveTopology topology = PrimitiveTopology::Triangles;
         DepthState depthState{};
         BlendState blendState{};

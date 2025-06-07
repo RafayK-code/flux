@@ -12,10 +12,13 @@ namespace flux
     class VulkanPipeline : public Pipeline
     {
     public:
-        VulkanPipeline(const PipelineSpecification& specification, VkRenderPass renderPass = nullptr, uint32_t subpass = 0);
+        // this renderpass override is a disgusting hack that should be addressed properly at some point
+        VulkanPipeline(const PipelineSpecification& specification, VkRenderPass renderPassOverride = nullptr);
         virtual ~VulkanPipeline();
 
         void Bind(VkCommandBuffer commandBuffer) const;
+
+        VkPipeline NativePipeline() const { return pipeline_; }
         VkPipelineLayout PipelineLayout() const { return pipelineLayout_; }
 
     private:

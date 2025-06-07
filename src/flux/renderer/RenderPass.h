@@ -15,8 +15,14 @@ namespace flux
     class RenderPass : public RefCounted
     {
     public:
-        static Ref<RenderPass> Create(const Ref<Pipeline>& pipeline);
-
+        RenderPass(const Ref<Pipeline> pipeline) : pipeline_(pipeline) {}
         virtual ~RenderPass() = default;
+
+        virtual Ref<Pipeline> GetPipeline() const { return pipeline_; }
+        virtual Ref<Framebuffer> GetTargetFramebuffer() const { return pipeline_->Specification().framebuffer; }
+        virtual Ref<Shader> GetShader() const { return pipeline_->GetShader(); }
+
+    private:
+        Ref<Pipeline> pipeline_;
     };
 }

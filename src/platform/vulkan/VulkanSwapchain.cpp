@@ -17,8 +17,6 @@
     DBG_ASSERT(flux::fp##entrypoint, "");                                     \
 }
 
-constexpr uint32_t FRAMES_IN_FLIGHT = 3;
-
 namespace flux
 {
     static PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
@@ -256,12 +254,13 @@ namespace flux
             DBG_ASSERT(result == VK_SUCCESS, "Failed to create framebuffer: {0}", i);
         }
 
-        imageAvailableSemaphores_.resize(FRAMES_IN_FLIGHT);
-        renderFinishedSemaphores_.resize(FRAMES_IN_FLIGHT);
+        constexpr uint32_t framesInFlight = VulkanFramesInFlight();
+        imageAvailableSemaphores_.resize(framesInFlight);
+        renderFinishedSemaphores_.resize(framesInFlight);
         VkSemaphoreCreateInfo semaphoreCreateInfo{};
         semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+        for (uint32_t i = 0; i < framesInFlight; i++)
         {
             result = vkCreateSemaphore(vulkanDevice, &semaphoreCreateInfo, nullptr, &imageAvailableSemaphores_[i]);
             DBG_ASSERT(result == VK_SUCCESS, "Failed to create image semaphore: {0}", i);
@@ -274,7 +273,7 @@ namespace flux
         fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        inFlightFences_.resize(FRAMES_IN_FLIGHT);
+        inFlightFences_.resize(framesInFlight);
         imagesInFlight_.resize(imageCount_);
 
         for (auto& fence : inFlightFences_)
@@ -307,7 +306,8 @@ namespace flux
         if (swapchain_)
             fpDestroySwapchainKHR(device, swapchain_, nullptr);
 
-        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+        uint32_t framesInFlight = VulkanFramesInFlight();
+        for (uint32_t i = 0; i < framesInFlight; i++)
         {
             vkDestroySemaphore(device, renderFinishedSemaphores_[i], nullptr);
             vkDestroySemaphore(device, imageAvailableSemaphores_[i], nullptr);
@@ -370,7 +370,7 @@ namespace flux
         result = fpQueuePresentKHR(device_->GraphicQueue(), &presentInfo);
         DBG_ASSERT(result == VK_SUCCESS, "");
 
-        currentFrameIndex_ = (currentFrameIndex_ + 1) % FRAMES_IN_FLIGHT;
+        currentFrameIndex_ = (currentFrameIndex_ + 1) % VulkanFramesInFlight();
     }
 
     static void LoadVkFunctionPointers(VkInstance instance, VkDevice device)

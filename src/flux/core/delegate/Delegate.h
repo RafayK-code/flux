@@ -48,7 +48,7 @@ namespace flux
             return Delegate((void*)(&instance), LambdaStub<TLambda>);
         }
 
-        inline TRet operator()(TParams&&... params) const
+        inline TRet operator()(TParams... params) const
         {
             return (*invocation_.stub)(invocation_.object, std::forward<TParams>(params)...);
         }

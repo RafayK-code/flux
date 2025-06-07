@@ -43,6 +43,7 @@ namespace flux
 
         vkGetDeviceQueue(logicalDevice_, physicalDevice_->queueFamilyIndices_.graphicsFamily, 0, &graphicsQueue_);
         commandPool_ = CreateRef<VulkanCommandPool>(logicalDevice_, physicalDevice_->queueFamilyIndices_.graphicsFamily);
+        descriptorPool_ = CreateRef<VulkanDescriptorPool>(logicalDevice_);
     }
 
     VulkanDevice::~VulkanDevice()
@@ -51,15 +52,16 @@ namespace flux
         DBG_ASSERT(commandPool_.use_count() <= 1, "Something owns the command pool when destroyed was called");
         vkDeviceWaitIdle(logicalDevice_);
         commandPool_.reset();
+        descriptorPool_.reset();
         vkDestroyDevice(logicalDevice_, nullptr);
     }
 
-    VkCommandBuffer VulkanDevice::CommandBuffer(bool begin)
+    VkCommandBuffer VulkanDevice::AllocateCommandBuffer() const
     {
-        return commandPool_->AllocateCommandBuffer(begin);
+        return commandPool_->AllocateCommandBuffer();
     }
 
-    void VulkanDevice::FlushCommandBuffer(VkCommandBuffer commandBuffer)
+    void VulkanDevice::FlushCommandBuffer(VkCommandBuffer commandBuffer) const
     {
         return commandPool_->FlushCommandBuffer(commandBuffer, graphicsQueue_);
     }

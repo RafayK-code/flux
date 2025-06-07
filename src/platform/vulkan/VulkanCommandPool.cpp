@@ -12,7 +12,7 @@ namespace flux
         VkCommandPoolCreateInfo poolCreateInfo{};
         poolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         poolCreateInfo.queueFamilyIndex = queueFamilyIndex;
-        poolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        poolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 
         VkResult result = vkCreateCommandPool(logicalDevice_, &poolCreateInfo, nullptr, &commandPool_);
         DBG_ASSERT(result == VK_SUCCESS, "Failed to create command pool");
@@ -23,7 +23,7 @@ namespace flux
         vkDestroyCommandPool(logicalDevice_, commandPool_, nullptr);
     }
 
-    VkCommandBuffer VulkanCommandPool::AllocateCommandBuffer(bool begin) const
+    VkCommandBuffer VulkanCommandPool::AllocateCommandBuffer() const
     {
         VkCommandBuffer cmdBuffer;
 
@@ -36,15 +36,31 @@ namespace flux
         VkResult result = vkAllocateCommandBuffers(logicalDevice_, &allocateInfo, &cmdBuffer);
         DBG_ASSERT(result == VK_SUCCESS, "Failed to create command buffer");
 
-        if (begin)
-        {
-            VkCommandBufferBeginInfo beginInfo{};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            result = vkBeginCommandBuffer(cmdBuffer, &beginInfo);
-            DBG_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer");
-        }
-
         return cmdBuffer;
+    }
+
+    std::vector<VkCommandBuffer> VulkanCommandPool::AllocateCommandBuffer(uint32_t count) const
+    {
+        std::vector<VkCommandBuffer> commandBuffers(count);
+
+        VkCommandBufferAllocateInfo allocateInfo{};
+        allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocateInfo.commandPool = commandPool_;
+        allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocateInfo.commandBufferCount = count;
+
+        VkResult result = vkAllocateCommandBuffers(logicalDevice_, &allocateInfo, commandBuffers.data());
+        DBG_ASSERT(result == VK_SUCCESS, "Failed to create command buffer");
+
+        return commandBuffers;
+    }
+
+    void VulkanCommandPool::BeginCommandBuffer(VkCommandBuffer commandBuffer) const
+    {
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        VkResult result = vkBeginCommandBuffer(commandBuffer, &beginInfo);
+        DBG_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer");
     }
 
     void VulkanCommandPool::FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue) const
@@ -77,5 +93,15 @@ namespace flux
 
         vkDestroyFence(logicalDevice_, fence, nullptr);
         vkFreeCommandBuffers(logicalDevice_, commandPool_, 1, &commandBuffer);
+    }
+
+    void VulkanCommandPool::FreeCommandBuffer(VkCommandBuffer commandBuffer) const
+    {
+        vkFreeCommandBuffers(logicalDevice_, commandPool_, 1, &commandBuffer);
+    }
+
+    void VulkanCommandPool::FreeCommandBuffer(const std::vector<VkCommandBuffer>& commandBuffers) const
+    {
+        vkFreeCommandBuffers(logicalDevice_, commandPool_, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
     }
 }

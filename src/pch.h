@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <array>
 #include <map>
 #include <set>
 #include <unordered_map>
@@ -11,6 +12,7 @@
 #include <functional>
 #include <algorithm>
 #include <numeric>
+#include <fstream>
 
 #include <flux/core/base.h>
 #include <flux/core/LogManager.h>

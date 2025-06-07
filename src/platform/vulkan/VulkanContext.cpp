@@ -14,6 +14,150 @@ namespace flux
 
     static uint32_t vulkanContextCount = 0;
 
+    static constexpr const char* VkDebugUtilsMessageType(const VkDebugUtilsMessageTypeFlagsEXT type);
+    static constexpr const char* VkDebugUtilsMessageSeverity(const VkDebugUtilsMessageSeverityFlagBitsEXT severity);
+    static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugUtilsMessengerCallback(const VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, const VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
+    static bool CheckValidationLayerSupport(const char* validationLayer);
+    static std::vector<const char*> GetRequiredExtensions();
+
+    VkInstance VulkanContext::vulkanInstance_ = nullptr;
+    Ref<VulkanDevice> VulkanContext::device_ = nullptr;
+    Ref<VulkanPhysicalDevice> VulkanContext::physicalDevice_ = nullptr;;
+    VkDebugUtilsMessengerEXT VulkanContext::debugUtilsMessenger_ = nullptr;
+    Scope<VulkanAllocator> VulkanContext::allocator_ = nullptr;
+
+    VulkanContext::VulkanContext(GLFWwindow* window)
+        : surface_(nullptr), windowHandle_(window)
+    {
+        DBG_ASSERT(windowHandle_, "Window cannot be null");
+
+        if (vulkanContextCount == 0)
+        {
+            CreateInstance();
+        }
+
+        VkResult createRes = glfwCreateWindowSurface(vulkanInstance_, windowHandle_, nullptr, &surface_);
+        DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan surface");
+
+        //gross... but technically needs the surface in order to work
+        if (vulkanContextCount == 0)
+        {
+            CreateDevice();
+            allocator_ = CreateScope<VulkanAllocator>(vulkanInstance_, device_);
+        }
+
+        int width, height;
+        glfwGetWindowSize(windowHandle_, &width, &height);
+
+        VulkanSwapchainCreateProps props = { width, height, true };
+        swapchain_ = CreateRef<VulkanSwapchain>(vulkanInstance_, device_, surface_, props);
+
+        vulkanContextCount++;
+    }
+
+    VulkanContext::~VulkanContext()
+    {
+        device_->Idle();
+
+        swapchain_.reset();
+
+        vkDestroySurfaceKHR(vulkanInstance_, surface_, nullptr);
+        vulkanContextCount--;
+
+        if (vulkanContextCount == 0)
+        {
+            allocator_.reset();
+            device_.reset();
+
+            if (debugUtilsMessenger_)
+            {
+                PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)
+                    vkGetInstanceProcAddr(vulkanInstance_, "vkDestroyDebugUtilsMessengerEXT");
+
+                vkDestroyDebugUtilsMessengerEXT(vulkanInstance_, debugUtilsMessenger_, nullptr);
+            }
+
+            vkDestroyInstance(vulkanInstance_, nullptr);
+        }
+    }
+
+    void VulkanContext::PreWindowCreateHints()
+    {
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    }
+
+    void VulkanContext::CreateInstance()
+    {
+        VkApplicationInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+        info.pApplicationName = ENGINE_NAME;
+        info.pEngineName = ENGINE_NAME;
+        info.apiVersion = VK_API_VERSION_1_2;
+
+        uint32_t extensionCount = 0;
+        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+        std::vector<VkExtensionProperties> extensions2(extensionCount);
+        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions2.data());
+
+        std::vector<const char*> extensions = GetRequiredExtensions();
+
+        VkInstanceCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        createInfo.pNext = nullptr;
+        createInfo.pApplicationInfo = &info;
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+        createInfo.ppEnabledExtensionNames = extensions.data();
+        createInfo.enabledLayerCount = 0;
+        createInfo.ppEnabledLayerNames = nullptr;
+
+        const char* validationLayer = "VK_LAYER_KHRONOS_validation";
+        if (enableValidationLayers)
+        {
+            if (CheckValidationLayerSupport(validationLayer))
+            {
+                createInfo.enabledLayerCount = 1;
+                createInfo.ppEnabledLayerNames = &validationLayer;
+            }
+            else
+            {
+                DBG_ERROR("Validation layer [VK_LAYER_KHRONOS_validation] not present, validation is disabled");
+            }
+        }
+
+        VkResult createRes = vkCreateInstance(&createInfo, nullptr, &vulkanInstance_);
+        DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan instance");
+
+        if (enableValidationLayers)
+        {
+            PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vulkanInstance_, "vkCreateDebugUtilsMessengerEXT");
+            DBG_ASSERT(vkCreateDebugUtilsMessengerEXT != NULL, "");
+            VkDebugUtilsMessengerCreateInfoEXT debugUtilsCreateInfo{};
+            debugUtilsCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+            debugUtilsCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+            debugUtilsCreateInfo.pfnUserCallback = VulkanDebugUtilsMessengerCallback;
+            debugUtilsCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+
+            createRes = vkCreateDebugUtilsMessengerEXT(vulkanInstance_, &debugUtilsCreateInfo, nullptr, &debugUtilsMessenger_);
+            DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan debug messenger");
+        }
+    }
+
+    void VulkanContext::CreateDevice()
+    {
+        physicalDevice_ = VulkanPhysicalDevice::Select(vulkanInstance_, surface_);
+
+        VkPhysicalDeviceFeatures enabledFeatures;
+        memset(&enabledFeatures, 0, sizeof(VkPhysicalDeviceFeatures));
+        enabledFeatures.samplerAnisotropy = true;
+        enabledFeatures.wideLines = true;
+        enabledFeatures.fillModeNonSolid = true;
+        enabledFeatures.independentBlend = true;
+        enabledFeatures.pipelineStatisticsQuery = true;
+        enabledFeatures.shaderStorageImageReadWithoutFormat = true;
+
+        device_ = CreateRef<VulkanDevice>(physicalDevice_, enabledFeatures);
+    }
+
     static constexpr const char* VkDebugUtilsMessageType(const VkDebugUtilsMessageTypeFlagsEXT type)
     {
         switch (type)
@@ -107,132 +251,5 @@ namespace flux
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
         return extensions;
-    }
-
-    VkInstance VulkanContext::vulkanInstance_ = nullptr;
-    Ref<VulkanDevice> VulkanContext::device_ = nullptr;
-    Ref<VulkanPhysicalDevice> VulkanContext::physicalDevice_ = nullptr;;
-    VkDebugUtilsMessengerEXT VulkanContext::debugUtilsMessenger_ = nullptr;
-
-    VulkanContext::VulkanContext(GLFWwindow* window)
-        : surface_(nullptr), windowHandle_(window)
-    {
-        DBG_ASSERT(windowHandle_, "Window cannot be null");
-
-        if (vulkanContextCount == 0)
-        {
-            CreateInstance();
-        }
-
-        VkResult createRes = glfwCreateWindowSurface(vulkanInstance_, windowHandle_, nullptr, &surface_);
-        DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan surface");
-
-        //gross... but technically needs the surface in order to work
-        if (vulkanContextCount == 0)
-        {
-            CreateDevice();
-        }
-
-        vulkanContextCount++;
-    }
-
-    VulkanContext::~VulkanContext()
-    {
-        device_->Idle();
-
-        vkDestroySurfaceKHR(vulkanInstance_, surface_, nullptr);
-        vulkanContextCount--;
-
-        if (vulkanContextCount == 0)
-        {
-            device_.reset();
-
-            if (debugUtilsMessenger_)
-            {
-                PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)
-                    vkGetInstanceProcAddr(vulkanInstance_, "vkDestroyDebugUtilsMessengerEXT");
-
-                vkDestroyDebugUtilsMessengerEXT(vulkanInstance_, debugUtilsMessenger_, nullptr);
-            }
-
-            vkDestroyInstance(vulkanInstance_, nullptr);
-        }
-    }
-
-    void VulkanContext::PreWindowCreateHints()
-    {
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    }
-
-    void VulkanContext::CreateInstance()
-    {
-        VkApplicationInfo info{};
-        info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        info.pApplicationName = ENGINE_NAME;
-        info.pEngineName = ENGINE_NAME;
-        info.apiVersion = VK_API_VERSION_1_2;
-
-        uint32_t extensionCount = 0;
-        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-        std::vector<VkExtensionProperties> extensions2(extensionCount);
-        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions2.data());
-
-        std::vector<const char*> extensions = GetRequiredExtensions();
-
-        VkInstanceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pNext = nullptr;
-        createInfo.pApplicationInfo = &info;
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-        createInfo.ppEnabledExtensionNames = extensions.data();
-        createInfo.enabledLayerCount = 0;
-        createInfo.ppEnabledLayerNames = nullptr;
-
-        const char* validationLayer = "VK_LAYER_KHRONOS_validation";
-        if (enableValidationLayers)
-        {
-            if (CheckValidationLayerSupport(validationLayer))
-            {
-                createInfo.enabledLayerCount = 1;
-                createInfo.ppEnabledLayerNames = &validationLayer;
-            }
-            else
-            {
-                DBG_ERROR("Validation layer [VK_LAYER_KHRONOS_validation] not present, validation is disabled");
-            }
-        }
-
-        VkResult createRes = vkCreateInstance(&createInfo, nullptr, &vulkanInstance_);
-        DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan instance");
-
-        if (enableValidationLayers)
-        {
-            PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vulkanInstance_, "vkCreateDebugUtilsMessengerEXT");
-            DBG_ASSERT(vkCreateDebugUtilsMessengerEXT != NULL, "");
-            VkDebugUtilsMessengerCreateInfoEXT debugUtilsCreateInfo{};
-            debugUtilsCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-            debugUtilsCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-            debugUtilsCreateInfo.pfnUserCallback = VulkanDebugUtilsMessengerCallback;
-            debugUtilsCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-
-            createRes = vkCreateDebugUtilsMessengerEXT(vulkanInstance_, &debugUtilsCreateInfo, nullptr, &debugUtilsMessenger_);
-            DBG_ASSERT(createRes == VK_SUCCESS, "Unable to create vulkan debug messenger");
-        }
-    }
-
-    void VulkanContext::CreateDevice()
-    {
-        physicalDevice_ = VulkanPhysicalDevice::Select(vulkanInstance_, surface_);
-
-        VkPhysicalDeviceFeatures enabledFeatures;
-        memset(&enabledFeatures, 0, sizeof(VkPhysicalDeviceFeatures));
-        enabledFeatures.samplerAnisotropy = true;
-        enabledFeatures.wideLines = true;
-        enabledFeatures.fillModeNonSolid = true;
-        enabledFeatures.independentBlend = true;
-        enabledFeatures.pipelineStatisticsQuery = true;
-        enabledFeatures.shaderStorageImageReadWithoutFormat = true;
-
-        device_ = CreateRef<VulkanDevice>(physicalDevice_, enabledFeatures);
     }
 }

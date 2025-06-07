@@ -11,14 +11,10 @@ namespace flux
     class VulkanAllocator
     {
     public:
-        VulkanAllocator() = default;
-        VulkanAllocator(const std::string& tag);
-        ~VulkanAllocator() = default;
+        VulkanAllocator(VkInstance instance, const Ref<VulkanDevice>& device);
+        ~VulkanAllocator();
 
-        static void Init(VkInstance instance, const Ref<VulkanDevice>& device);
-        static void Shutdown();
-
-        static VmaAllocator& GetVmaAllocator();
+        inline VmaAllocator GetVmaAllocator() { return allocator_; }
 
         VmaAllocation AllocateBuffer(VkBufferCreateInfo bufferCreateInfo, VmaMemoryUsage usage, VkBuffer& outBuffer);
         VmaAllocation AllocateImage(VkImageCreateInfo imageCreateInfo, VmaMemoryUsage usage, VkImage& outImage, VkDeviceSize* allocatedSize = nullptr);
@@ -31,13 +27,13 @@ namespace flux
         T* MapMemory(VmaAllocation allocation)
         {
             T* mappedMemory;
-            vmaMapMemory(VulkanAllocator::GetVmaAllocator(), allocation, (void**)&mappedMemory);
+            vmaMapMemory(allocator_, allocation, (void**)&mappedMemory);
             return mappedMemory;
         }
 
         void UnmapMemory(VmaAllocation allocation);
 
     private:
-        std::string tag_;
+        VmaAllocator allocator_;
     };
 }

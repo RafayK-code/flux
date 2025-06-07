@@ -59,6 +59,14 @@ namespace flux
         vkDestroyShaderModule(device->NativeVulkanDevice(), fsModule_, nullptr);
     }
 
+    void VulkanShader::PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding) const
+    {
+        for (uint32_t i = 0; i < static_cast<uint32_t>(descriptorSets_.size()); i++)
+        {
+            PushUniformBuffer(ub, binding, i);
+        }
+    }
+
     void VulkanShader::PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding, uint32_t index) const
     {
         Ref<VulkanUniformBuffer> vulkanUb = std::dynamic_pointer_cast<VulkanUniformBuffer>(ub);
@@ -74,6 +82,14 @@ namespace flux
 
         VkDevice device = VulkanContext::Device()->NativeVulkanDevice();
         vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
+    }
+
+    void VulkanShader::PushSampler(const Ref<Image>& image, uint32_t binding) const
+    {
+        for (uint32_t i = 0; i < static_cast<uint32_t>(descriptorSets_.size()); i++)
+        {
+            PushSampler(image, binding, i);
+        }
     }
 
     void VulkanShader::PushSampler(const Ref<Image>& image, uint32_t binding, uint32_t index) const

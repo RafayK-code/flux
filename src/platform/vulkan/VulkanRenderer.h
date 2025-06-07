@@ -16,10 +16,12 @@ namespace flux
         VulkanRenderer(const Ref<GraphicsContext>& graphicsContext);
         virtual ~VulkanRenderer();
 
-        virtual void BeginFrame() override;
+        virtual uint32_t BeginFrame() override;
         virtual void Present(const Ref<Image>& finalImage) override;
 
-        virtual void Draw(const Ref<RenderPass>& renderPass, const Ref<VertexArray>& vertexArray) override;
+        virtual uint32_t CurrentFrameInFlight() const { return currentFrameInFlight_; }
+
+        virtual void Draw(const Ref<RenderPass>& renderPass, const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) override;
 
     private:
         std::vector<VkCommandBuffer> commandBuffers_;
@@ -28,6 +30,8 @@ namespace flux
         Ref<RenderPass> swapchainRenderPass_;
         Ref<VertexArray> swapchainVertexArray_;
         uint32_t currentFrameInFlight_;
+
+        Ref<UniformBuffer> viewProjectionUB_;
 
         std::vector<std::function<void(VkCommandBuffer cmd)>> drawCommands_;
     };

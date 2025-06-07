@@ -33,10 +33,12 @@ namespace flux
 
         static Type Current() { return currentAPI; }
 
-        virtual void BeginFrame() = 0;
+        virtual uint32_t BeginFrame() = 0;
         virtual void Present(const Ref<Image>& finalImage) = 0;
 
-        virtual void Draw(const Ref<RenderPass>& renderPass, const Ref<VertexArray>& vertexArray) = 0;
+        virtual uint32_t CurrentFrameInFlight() const = 0;
+
+        virtual void Draw(const Ref<RenderPass>& renderPass, const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
 
     private:
         static Type currentAPI;

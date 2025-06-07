@@ -15,6 +15,8 @@ namespace flux
         virtual void BindContext() override;
         virtual void SwapBuffers() override;
 
+        virtual uint32_t FramesInFlight() const override { return 1; }
+
         static void PreWindowCreateHints();
 
     private:

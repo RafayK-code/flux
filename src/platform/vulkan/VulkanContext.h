@@ -24,6 +24,8 @@ namespace flux
         virtual void BindContext() override {}
         virtual void SwapBuffers() override {}
 
+        virtual uint32_t FramesInFlight() const override { return VulkanFramesInFlight(); }
+
         static void PreWindowCreateHints();
 
         static inline VkInstance Instance() { return vulkanInstance_; }

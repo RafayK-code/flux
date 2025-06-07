@@ -17,8 +17,11 @@ namespace flux
         virtual void Bind() override {};
         virtual void Unbind() override {};
 
-        virtual void PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding, uint32_t index = 0) const override;
-        virtual void PushSampler(const Ref<Image>& image, uint32_t binding, uint32_t index = 0) const override;
+        virtual void PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding) const override;
+        virtual void PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding, uint32_t index) const override;
+
+        virtual void PushSampler(const Ref<Image>& image, uint32_t binding) const override;
+        virtual void PushSampler(const Ref<Image>& image, uint32_t binding, uint32_t index) const override;
 
         VkShaderModule VertexShaderModule() const { return vsModule_; }
         VkShaderModule FragmentShaderModule() const { return fsModule_; }

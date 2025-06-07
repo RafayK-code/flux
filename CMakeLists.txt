@@ -16,6 +16,7 @@ set(GLAD_PATH ${CMAKE_SOURCE_DIR}/extern/glad)
 set(SPDLOG_PATH ${CMAKE_SOURCE_DIR}/extern/spdlog)
 set(VMA_PATH ${CMAKE_SOURCE_DIR}/extern/vma)
 set(STB_PATH ${CMAKE_SOURCE_DIR}/extern/stb)
+set(GLM_PATH ${CMAKE_SOURCE_DIR}/extern/glm)
 
 file(GLOB_RECURSE FLUX_SRC_FILES
     "${FLUX_SRC_PATH}/flux/*.cpp"
@@ -73,6 +74,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${GLAD_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${SPDLOG_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${VMA_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${STB_PATH}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${GLM_PATH})
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw)

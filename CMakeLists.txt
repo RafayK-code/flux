@@ -8,15 +8,17 @@ set(FLUX_PATH_TO_VULKAN_SDK "" CACHE PATH "Path to the Vulkan SDK")
 
 set(CMAKE_CXX_STANDARD 17)
 
+add_subdirectory(extern)
+
 find_package(Vulkan REQUIRED)
 
 set(FLUX_SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/src)
-set(GLFW_PATH ${CMAKE_SOURCE_DIR}/extern/glfw)
-set(GLAD_PATH ${CMAKE_SOURCE_DIR}/extern/glad)
-set(SPDLOG_PATH ${CMAKE_SOURCE_DIR}/extern/spdlog)
-set(VMA_PATH ${CMAKE_SOURCE_DIR}/extern/vma)
-set(STB_PATH ${CMAKE_SOURCE_DIR}/extern/stb)
-set(GLM_PATH ${CMAKE_SOURCE_DIR}/extern/glm)
+set(GLFW_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/glfw)
+set(GLAD_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/glad)
+set(SPDLOG_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/spdlog)
+set(VMA_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/vma)
+set(STB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/stb)
+set(GLM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/glm)
 
 file(GLOB_RECURSE FLUX_SRC_FILES
     "${FLUX_SRC_PATH}/flux/*.cpp"
@@ -84,5 +86,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC vma)
 target_link_libraries(${PROJECT_NAME} PUBLIC stb)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Vulkan_LIBRARIES})
 
-add_dependencies(${PROJECT_NAME} spirv-shaders)
-add_dependencies(${PROJECT_NAME} copy-images)
+#add_dependencies(${PROJECT_NAME} spirv-shaders)
+#add_dependencies(${PROJECT_NAME} copy-images)

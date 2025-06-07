@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(flux)
 
-set(FLUX_BUILD_SHARED ON CACHE BOOL "Build engine as shared library")
+set(FLUX_BUILD_SHARED OFF CACHE BOOL "Build engine as shared library")
 set(FLUX_ENABLE_THREADING ON CACHE BOOL "Support multithreading safety within flux")
 set(FLUX_ENABLE_INTRUSIVE_REF OFF CACHE BOOL "Support multithreading safety within flux")
 set(FLUX_PATH_TO_VULKAN_SDK "" CACHE PATH "Path to the Vulkan SDK")

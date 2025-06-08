@@ -28,6 +28,8 @@ namespace flux
         VkBuffer vulkanBuffer_;
         VmaAllocation allocation_;
 
+        Usage usage_;
+        uint8_t* data_;
         uint64_t size_;
     };
 }

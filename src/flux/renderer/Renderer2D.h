@@ -8,7 +8,7 @@ namespace flux
 {
     struct Renderer2DSpecification
     {
-        uint32_t maxQuads = 1000;
+        uint32_t maxQuads = 10000;
         Ref<GraphicsContext> graphicsContext;
     };
 

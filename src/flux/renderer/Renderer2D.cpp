@@ -47,7 +47,7 @@ namespace flux
         for (uint32_t i = 0; i < context_->FramesInFlight(); i++)
         {
             batchData_->quadVertexArrays[i] = VertexArray::Create();
-            batchData_->quadVertexBuffers[i] = VertexBuffer::Create(maxQuads_ * sizeof(QuadVertex));
+            batchData_->quadVertexBuffers[i] = VertexBuffer::Create(maxVertices_ * sizeof(QuadVertex));
 
             batchData_->quadVertexArrays[i]->SetVertexBuffer(batchData_->quadVertexBuffers[i]);
             batchData_->quadVertexArrays[i]->SetIndexBuffer(quadIndexBuffer);

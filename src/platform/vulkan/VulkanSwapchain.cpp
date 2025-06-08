@@ -40,6 +40,8 @@ namespace flux
         , surface_(surface)
         , queueFamilyIndex_(std::numeric_limits<uint32_t>::max())
         , vsync_(props.vsync)
+        , renderPass_(nullptr)
+        , swapchain_(nullptr)
         , currentFrameIndex_(0)
         , currentImageIndex_(0)
     {
@@ -55,8 +57,19 @@ namespace flux
 
         queueFamilyIndex_ = graphicsFamilyIndex;
 
-        FindImageFormatAndColorSpace(colorFormat_, colorSpace_, physicalDevice, surface_);;
+        FindImageFormatAndColorSpace(colorFormat_, colorSpace_, physicalDevice, surface_);
 
+        Create(props);
+    }
+
+    VulkanSwapchain::~VulkanSwapchain()
+    {
+        Destroy();
+    }
+
+    void VulkanSwapchain::Create(VulkanSwapchainCreateProps& props)
+    {
+        VkPhysicalDevice physicalDevice = device_->PhysicalDevice()->NativePhysicalDevice();
         VkDevice vulkanDevice = device_->NativeVulkanDevice();
 
         VkSurfaceCapabilitiesKHR surfCaps{};
@@ -86,6 +99,7 @@ namespace flux
 
         width_ = props.width;
         height_ = props.height;
+        vsync_ = props.vsync;
 
         DBG_ASSERT(width_ > 0 && height_ > 0, "invalid parameters for width and height");
 
@@ -128,6 +142,8 @@ namespace flux
             };
         }
 
+        VkSwapchainKHR oldSwapchain = swapchain_;
+
         // finally
         VkSwapchainCreateInfoKHR swapchainCreateInfo{};
         swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -144,7 +160,7 @@ namespace flux
         swapchainCreateInfo.queueFamilyIndexCount = 0;      // ignored due to sharing mode
         swapchainCreateInfo.pQueueFamilyIndices = nullptr;  // ignored due to sharing mode
         swapchainCreateInfo.presentMode = swapchainPresentMode;
-        swapchainCreateInfo.oldSwapchain = nullptr;         // BAD - need a way to recreate a swap chain from an old one
+        swapchainCreateInfo.oldSwapchain = oldSwapchain;         // BAD - need a way to recreate a swap chain from an old one
         swapchainCreateInfo.clipped = VK_TRUE;
         swapchainCreateInfo.compositeAlpha = compositeAlpha;
 
@@ -156,6 +172,11 @@ namespace flux
 
         result = fpCreateSwapchainKHR(vulkanDevice, &swapchainCreateInfo, nullptr, &swapchain_);
         DBG_ASSERT(result == VK_SUCCESS, "Failed to create swapchain");
+
+        Destroy(false);
+
+        if (oldSwapchain)
+            fpDestroySwapchainKHR(vulkanDevice, oldSwapchain, nullptr);
 
         result = fpGetSwapchainImagesKHR(vulkanDevice, swapchain_, &imageCount_, nullptr);
         DBG_ASSERT(result == VK_SUCCESS, "");
@@ -198,7 +219,6 @@ namespace flux
         renderPass_ = CreateRenderPass(vulkanDevice, colorFormat_, depthFormat);
 
         depthImages_.resize(imageCount_);
-
         for (uint32_t i = 0; i < imageCount_; i++)
         {
             VkImageCreateInfo imageInfo{};
@@ -232,7 +252,7 @@ namespace flux
 
             vkCreateImageView(vulkanDevice, &viewInfo, nullptr, &depthImages_[i].imageView);
         }
-        
+
         VkImageView imageAttachments[2]{};
 
         VkFramebufferCreateInfo framebufferCreateInfo{};
@@ -283,7 +303,7 @@ namespace flux
         }
     }
 
-    VulkanSwapchain::~VulkanSwapchain()
+    void VulkanSwapchain::Destroy(bool destroySwapchain)
     {
         device_->Idle();
         VkDevice device = device_->NativeVulkanDevice();
@@ -291,28 +311,54 @@ namespace flux
         for (const auto& framebuffer : framebuffers_)
             vkDestroyFramebuffer(device, framebuffer, nullptr);
 
+        framebuffers_.clear();
+
         for (const auto& depthImage : depthImages_)
         {
             vkDestroyImageView(device, depthImage.imageView, nullptr);
             VulkanContext::Allocator().DestroyImage(depthImage.image, depthImage.memoryAlloc);
         }
 
+        depthImages_.clear();
+
         for (const auto& image : images_)
             vkDestroyImageView(device, image.imageView, nullptr);
+
+        images_.clear();
 
         if (renderPass_)
             vkDestroyRenderPass(device, renderPass_, nullptr);
 
-        if (swapchain_)
-            fpDestroySwapchainKHR(device, swapchain_, nullptr);
+        renderPass_ = nullptr;
 
-        uint32_t framesInFlight = VulkanFramesInFlight();
-        for (uint32_t i = 0; i < framesInFlight; i++)
+        if (destroySwapchain)
+        {
+            if (swapchain_)
+                fpDestroySwapchainKHR(device, swapchain_, nullptr);
+
+            swapchain_ = nullptr;
+        }
+
+        //constexpr uint32_t framesInFlight = VulkanFramesInFlight();
+        for (uint32_t i = 0; i < inFlightFences_.size(); i++)
         {
             vkDestroySemaphore(device, renderFinishedSemaphores_[i], nullptr);
             vkDestroySemaphore(device, imageAvailableSemaphores_[i], nullptr);
             vkDestroyFence(device, inFlightFences_[i], nullptr);
         }
+
+        renderFinishedSemaphores_.clear();
+        imageAvailableSemaphores_.clear();
+        inFlightFences_.clear();
+        imagesInFlight_.clear();
+    }
+
+    void VulkanSwapchain::OnResize(uint32_t width, uint32_t height)
+    {
+        device_->Idle();
+        VulkanSwapchainCreateProps props = { width, height, vsync_ };
+        Create(props);
+        device_->Idle();
     }
 
     uint32_t VulkanSwapchain::AcquireNextImage()
@@ -368,7 +414,17 @@ namespace flux
         presentInfo.pImageIndices = &currentImageIndex_;
 
         result = fpQueuePresentKHR(device_->GraphicQueue(), &presentInfo);
-        DBG_ASSERT(result == VK_SUCCESS, "");
+        if (result != VK_SUCCESS)
+        {
+            if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+            {
+                OnResize(width_, height_);
+            }
+            else
+            {
+                DBG_ASSERT(false, "");
+            }
+        }
 
         currentFrameIndex_ = (currentFrameIndex_ + 1) % VulkanFramesInFlight();
     }

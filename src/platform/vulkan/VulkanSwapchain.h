@@ -22,6 +22,11 @@ namespace flux
         VulkanSwapchain(VkInstance instance, const Ref<VulkanDevice>& device, VkSurfaceKHR surface, VulkanSwapchainCreateProps& props);
         ~VulkanSwapchain();
 
+        void Create(VulkanSwapchainCreateProps& props);
+        void Destroy(bool destroySwapchain = true);
+
+        void OnResize(uint32_t width, uint32_t height);
+
         inline uint32_t ImageCount() const { return imageCount_; }
 
         inline uint32_t Width() const { return width_; }

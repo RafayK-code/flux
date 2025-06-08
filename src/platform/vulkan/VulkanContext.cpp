@@ -81,6 +81,11 @@ namespace flux
         }
     }
 
+    void VulkanContext::OnWindowResize(uint32_t width, uint32_t height)
+    {
+        swapchain_->OnResize(width, height);
+    }
+
     void VulkanContext::PreWindowCreateHints()
     {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

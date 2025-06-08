@@ -14,6 +14,8 @@ namespace flux
         virtual void BindContext() = 0;
         virtual void SwapBuffers() = 0;
 
+        virtual void OnWindowResize(uint32_t width, uint32_t height) = 0;
+
         virtual uint32_t FramesInFlight() const = 0;
 
         static void PreWindowCreateHints();

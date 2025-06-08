@@ -61,6 +61,7 @@ namespace flux
     void Window::Resize(uint32_t width, uint32_t height)
     {
         glfwSetWindowSize(window_, static_cast<int>(width), static_cast<int>(height));
+        context_->OnWindowResize(width, height);
     }
 
     void Window::SetVSync(bool enabled)

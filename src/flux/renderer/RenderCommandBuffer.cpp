@@ -5,7 +5,7 @@
 
 namespace flux
 {
-    Ref<RenderCommandBuffer> RenderCommandBuffer::Create()
+    Ref<RenderCommandBuffer> RenderCommandBuffer::Create(const Ref<GraphicsContext>& graphicsContext)
     {
         switch (RendererAPI::Current())
         {

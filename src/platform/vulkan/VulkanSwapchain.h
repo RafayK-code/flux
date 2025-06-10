@@ -41,6 +41,7 @@ namespace flux
         void Present(const VkCommandBuffer* commandBuffers);
 
         uint32_t CurrentImageIndex() const { return currentImageIndex_; }
+        uint32_t CurrentFrameIndex() const { return currentFrameIndex_; }
 
     private:
         VkInstance instance_;

@@ -62,10 +62,11 @@ namespace flux
         Ref<Shader> quadShader = Shader::Create("assets/shaders/textured_quad.vert.spv", "assets/shaders/textured_quad.frag.spv", layout);
 
         PipelineSpecification quadPipelineSpec{};
-        quadPipelineSpec.framebuffer = batchData_->framebuffer_;
+        quadPipelineSpec.framebuffer = nullptr;
         quadPipelineSpec.shader = quadShader;
         quadPipelineSpec.layout = vbLayout;
         quadPipelineSpec.depthState.enabled = true;
+        quadPipelineSpec.graphicsContext = context_;
         batchData_->quadPipeline = Pipeline::Create(quadPipelineSpec);
 
         batchData_->quadRenderPass = CreateRef<RenderPass>(batchData_->quadPipeline);
@@ -104,7 +105,7 @@ namespace flux
     void Renderer2D::EndFrame()
     {
         FlushCurrentBatch();
-        renderer_->Present(batchData_->framebuffer_->GetColorImage());
+        renderer_->Present();
     }
 
     void Renderer2D::StartBatch()

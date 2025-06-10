@@ -17,7 +17,7 @@ namespace flux
         virtual ~VulkanRenderer();
 
         virtual uint32_t BeginFrame() override;
-        virtual void Present(const Ref<Image>& finalImage) override;
+        virtual void Present() override;
 
         virtual uint32_t CurrentFrameInFlight() const { return currentFrameInFlight_; }
 

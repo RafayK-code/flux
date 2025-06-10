@@ -6,6 +6,7 @@
 #include <flux/renderer/GraphicsContext.h>
 #include <flux/renderer/VertexArray.h>
 #include <flux/renderer/RenderPass.h>
+#include <flux/renderer/RenderCommandBuffer.h>
 
 namespace flux
 {
@@ -34,11 +35,18 @@ namespace flux
         static Type Current() { return currentAPI; }
 
         virtual uint32_t BeginFrame() = 0;
-        virtual void Present(const Ref<Image>& finalImage) = 0;
+        virtual void Present() = 0;
 
         virtual uint32_t CurrentFrameInFlight() const = 0;
 
-        virtual void Draw(const Ref<RenderPass>& renderPass, const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
+        virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
+
+        virtual void BeginRenderPass(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<RenderPass>& renderPass) = 0;
+        virtual void EndRenderPass(const Ref<RenderCommandBuffer>& commandBuffer) = 0;
+
+        virtual void BindPipeline(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<Pipeline>& pipeline) = 0;
+
+        virtual void Draw(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
 
     private:
         static Type currentAPI;

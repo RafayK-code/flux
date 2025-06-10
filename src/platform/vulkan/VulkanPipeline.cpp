@@ -13,7 +13,7 @@ namespace flux
     static VkCompareOp FluxDepthCompareOpToVulkan(DepthCompareOp depthOp);
     static VkFormat FluxShaderDataTypeToVulkan(ShaderDataType type);
 
-    VulkanPipeline::VulkanPipeline(const PipelineSpecification& specification, VkRenderPass renderPassOverride)
+    VulkanPipeline::VulkanPipeline(const PipelineSpecification& specification)
     {
         specification_ = specification;
         Ref<VulkanDevice> device = VulkanContext::Device();
@@ -180,10 +180,14 @@ namespace flux
         vkCreatePipelineLayout(device->NativeVulkanDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout_);
 
         pipelineInfo.layout = pipelineLayout_;
-        if (!renderPassOverride)
+        if (specification_.framebuffer)
+        {
             pipelineInfo.renderPass = std::dynamic_pointer_cast<VulkanFramebuffer>(specification_.framebuffer)->NativeVulkanRenderPass();
+        }
         else
-            pipelineInfo.renderPass = renderPassOverride;
+        {
+            pipelineInfo.renderPass = std::dynamic_pointer_cast<VulkanContext>(specification_.graphicsContext)->Swapchain()->RenderPass();
+        }
 
         pipelineInfo.subpass = 0;       // will we change this? probably not tbh...
 

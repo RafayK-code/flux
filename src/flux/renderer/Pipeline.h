@@ -4,6 +4,7 @@
 #include <flux/renderer/Framebuffer.h>
 #include <flux/renderer/RenderStates.h>
 #include <flux/renderer/VertexBuffer.h>
+#include <flux/renderer/GraphicsContext.h>
 
 namespace flux
 {
@@ -21,7 +22,9 @@ namespace flux
     struct PipelineSpecification
     {
         Ref<Shader> shader;
-        Ref<Framebuffer> framebuffer;
+        Ref<Framebuffer> framebuffer;   // if framebuffer is null, use swapchain
+        Ref<GraphicsContext> graphicsContext;
+
         PrimitiveTopology topology = PrimitiveTopology::Triangles;
         DepthState depthState{};
         BlendState blendState{};

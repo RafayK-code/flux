@@ -53,9 +53,9 @@ namespace flux
 
         // let the hacky bullshit begin!
         Ref<VulkanSwapchain> swapchain = std::dynamic_pointer_cast<VulkanContext>(graphicsContext_)->Swapchain();
-        Ref<Pipeline> pipeline = CreateRef<VulkanPipeline>(spec, swapchain->RenderPass());
+        //Ref<Pipeline> pipeline = CreateRef<VulkanPipeline>(spec, swapchain->RenderPass());
 
-        swapchainRenderPass_ = CreateRef<RenderPass>(pipeline);
+        //swapchainRenderPass_ = CreateRef<RenderPass>(pipeline);
     }
 
     VulkanRenderer::~VulkanRenderer()
@@ -72,10 +72,10 @@ namespace flux
         return currentFrameInFlight_;
     }
 
-    void VulkanRenderer::Present(const Ref<Image>& finalImage)
+    void VulkanRenderer::Present()
     {
-        swapchainRenderPass_->GetShader()->PushSampler(finalImage, 1, currentFrameInFlight_);
-        Draw(swapchainRenderPass_, swapchainVertexArray_);
+        //swapchainRenderPass_->GetShader()->PushSampler(finalImage, 1, currentFrameInFlight_);
+        //Draw(swapchainRenderPass_, swapchainVertexArray_);
 
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;

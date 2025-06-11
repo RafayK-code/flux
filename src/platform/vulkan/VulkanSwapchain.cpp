@@ -363,8 +363,6 @@ namespace flux
 
     uint32_t VulkanSwapchain::AcquireNextImage()
     {
-        currentFrameIndex_ = (currentFrameIndex_ + 1) % VulkanFramesInFlight();
-
         VkResult result = vkWaitForFences(device_->NativeVulkanDevice(), 1, &inFlightFences_[currentFrameIndex_], VK_TRUE, std::numeric_limits<uint64_t>::max());
         DBG_ASSERT(result == VK_SUCCESS, "");
 
@@ -426,7 +424,7 @@ namespace flux
             }
         }
 
-        //currentFrameIndex_ = (currentFrameIndex_ + 1) % VulkanFramesInFlight();
+        currentFrameIndex_ = (currentFrameIndex_ + 1) % VulkanFramesInFlight();
     }
 
     static void LoadVkFunctionPointers(VkInstance instance, VkDevice device)

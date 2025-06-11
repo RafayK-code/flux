@@ -83,11 +83,14 @@ namespace flux
         batchData_->quadVertexPositions[1] = { 0.5f, 0.5f, 0.0f, 1.0f };
         batchData_->quadVertexPositions[2] = { 0.5f, -0.5f, 0.0f, 1.0f };
         batchData_->quadVertexPositions[3] = { -0.5f, -0.5f, 0.0f, 1.0f };
+
+        batchData_->commandBuffer_ = RenderCommandBuffer::Create(context_);
     }
 
     Renderer2D::~Renderer2D()
     {
         renderer_.reset();
+        batchData_->commandBuffer_.reset();
     }
 
     void Renderer2D::SetActiveCamera(const Ref<OrthographicCamera>& camera)
@@ -99,12 +102,17 @@ namespace flux
     void Renderer2D::BeginFrame()
     {
         renderer_->BeginFrame();
+        batchData_->commandBuffer_->Begin();
+        renderer_->BeginRenderPass(batchData_->commandBuffer_, batchData_->quadRenderPass);
         StartBatch();
     }
 
     void Renderer2D::EndFrame()
     {
         FlushCurrentBatch();
+        renderer_->EndRenderPass(batchData_->commandBuffer_);
+        batchData_->commandBuffer_->End();
+        renderer_->SubmitCommandBuffer(batchData_->commandBuffer_);
         renderer_->Present();
     }
 
@@ -130,7 +138,9 @@ namespace flux
             Ref<VertexBuffer> currVertexBuffer = batchData_->quadVertexBuffers[currFrameInFlight];
             currVertexBuffer->SetData(batchData_->quadVertexBufferBase, size);
 
-            renderer_->Draw(batchData_->quadRenderPass, batchData_->quadVertexArrays[currFrameInFlight], batchData_->quadIndexCount);
+            renderer_->BindPipeline(batchData_->commandBuffer_, batchData_->quadPipeline);
+            //renderer_->Draw(batchData_->quadRenderPass, batchData_->quadVertexArrays[currFrameInFlight], batchData_->quadIndexCount);
+            renderer_->Draw(batchData_->commandBuffer_, batchData_->quadVertexArrays[currFrameInFlight], batchData_->quadIndexCount);
         }
     }
 

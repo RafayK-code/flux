@@ -41,7 +41,7 @@ namespace flux
     void VulkanRenderer::SubmitCommandBuffer(const Ref<RenderCommandBuffer>& commandBuffer)
     {
         Ref<VulkanRenderCommandBuffer> vulkanCommandBuffer = std::dynamic_pointer_cast<VulkanRenderCommandBuffer>(commandBuffer);
-        commandsToExecute_.push_back(vulkanCommandBuffer->GetNativeCommandBuffer());
+        commandsToExecute_.push_back(vulkanCommandBuffer->GetNativeCommandBuffer(currentFrameInFlight_));
     }
 
     void VulkanRenderer::BeginRenderPass(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<RenderPass>& renderPass)
@@ -59,7 +59,7 @@ namespace flux
         uint32_t width = framebuffer ? framebuffer->Width() : swapchain->Width();
         uint32_t height = framebuffer ? framebuffer->Height() : swapchain->Height();
         VkRenderPass nativeRenderPass = framebuffer ? framebuffer->NativeVulkanRenderPass() : swapchain->RenderPass();
-        VkFramebuffer nativeFramebuffer = framebuffer ? framebuffer->NativeVulkanFramebuffer() : swapchain->CurrentFramebuffer();
+        VkFramebuffer nativeFramebuffer = framebuffer ? framebuffer->NativeVulkanFramebuffer() : swapchain->GetFramebuffer(frameInFlight);
 
         float depthClearValue = framebuffer ? framebuffer->Specification().depthClearValue : 1.0f;
 

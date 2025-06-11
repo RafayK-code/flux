@@ -40,14 +40,19 @@ namespace flux
         virtual uint32_t CurrentFrameInFlight() const = 0;
 
         virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
-        virtual void SubmitCommandBuffer(const Ref<RenderCommandBuffer>& commandBuffer)
+        virtual void SubmitCommandBuffer(const Ref<RenderCommandBuffer>& commandBuffer) = 0;
 
         virtual void BeginRenderPass(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<RenderPass>& renderPass) = 0;
+        virtual void BeginRenderPass(const Ref<RenderCommandBuffer>& commandBuffer, uint32_t frameInFlight, const Ref<RenderPass>& renderPass) = 0;
+
         virtual void EndRenderPass(const Ref<RenderCommandBuffer>& commandBuffer) = 0;
+        virtual void EndRenderPass(const Ref<RenderCommandBuffer>& commandBuffer, uint32_t frameInFlight) = 0;
 
         virtual void BindPipeline(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<Pipeline>& pipeline) = 0;
+        virtual void BindPipeline(const Ref<RenderCommandBuffer>& commandBuffer, uint32_t frameInFlight, const Ref<Pipeline>& pipeline) = 0;
 
         virtual void Draw(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
+        virtual void Draw(const Ref<RenderCommandBuffer>& commandBuffer, uint32_t frameInFlight, const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
 
     private:
         static Type currentAPI;

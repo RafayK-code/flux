@@ -380,7 +380,7 @@ namespace flux
         return currentFrameIndex_;
     }
 
-    void VulkanSwapchain::Present(const VkCommandBuffer* commandBuffers)
+    void VulkanSwapchain::Present(const std::vector<VkCommandBuffer>& commands)
     {
         VkDevice device = device_->NativeVulkanDevice();
 
@@ -396,8 +396,8 @@ namespace flux
         submitInfo.waitSemaphoreCount = 1;
         submitInfo.pWaitSemaphores = &imageAvailableSemaphores_[currentFrameIndex_];
         submitInfo.pWaitDstStageMask = waitStages;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = commandBuffers;
+        submitInfo.commandBufferCount = static_cast<uint32_t>(commands.size());
+        submitInfo.pCommandBuffers = commands.data();
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = &renderFinishedSemaphores_[currentFrameIndex_];
 

@@ -38,9 +38,10 @@ namespace flux
         inline VkFramebuffer CurrentFramebuffer() { return framebuffers_[currentImageIndex_]; }
 
         uint32_t AcquireNextImage();
-        void Present(const VkCommandBuffer* commandBuffers);
+        void Present(const std::vector<VkCommandBuffer>& commands);
 
         uint32_t CurrentImageIndex() const { return currentImageIndex_; }
+        uint32_t CurrentFrameIndex() const { return currentFrameIndex_; }
 
     private:
         VkInstance instance_;

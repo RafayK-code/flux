@@ -49,6 +49,7 @@ namespace flux
             std::vector<Ref<VertexArray>> quadVertexArrays;
             Ref<Pipeline> quadPipeline;
             Ref<RenderPass> quadRenderPass;
+            Ref<RenderCommandBuffer> commandBuffer_;
 
             uint32_t quadIndexCount = 0;
             QuadVertex* quadVertexBufferBase = nullptr;

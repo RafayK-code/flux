@@ -13,7 +13,7 @@ namespace flux
     {
     public:
         // this renderpass override is a disgusting hack that should be addressed properly at some point
-        VulkanPipeline(const PipelineSpecification& specification, VkRenderPass renderPassOverride = nullptr);
+        VulkanPipeline(const PipelineSpecification& specification);
         virtual ~VulkanPipeline();
 
         void Bind(VkCommandBuffer commandBuffer) const;

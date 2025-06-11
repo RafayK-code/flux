@@ -21,3 +21,4 @@
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL

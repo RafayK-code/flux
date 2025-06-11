@@ -30,6 +30,16 @@ namespace flux
         vkEndCommandBuffer(commandBuffers_[index]);
     }
 
+    void VulkanRenderCommandBuffer::Begin(uint32_t frameInFlight)
+    {
+        commandPool_->BeginCommandBuffer(commandBuffers_[frameInFlight]);
+    }
+
+    void VulkanRenderCommandBuffer::End(uint32_t frameInFlight)
+    {
+        vkEndCommandBuffer(commandBuffers_[frameInFlight]);
+    }
+
     VkCommandBuffer VulkanRenderCommandBuffer::GetNativeCommandBuffer() const
     {
         uint32_t index = std::dynamic_pointer_cast<VulkanContext>(context_)->Swapchain()->CurrentFrameIndex();

@@ -7,6 +7,7 @@
 #include <flux/renderer/VertexArray.h>
 #include <flux/renderer/RenderPass.h>
 #include <flux/renderer/RenderCommandBuffer.h>
+#include <flux/renderer/ShaderInputSet.h>
 
 namespace flux
 {
@@ -50,6 +51,9 @@ namespace flux
 
         virtual void BindPipeline(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<Pipeline>& pipeline) = 0;
         virtual void BindPipeline(const Ref<RenderCommandBuffer>& commandBuffer, uint32_t frameInFlight, const Ref<Pipeline>& pipeline) = 0;
+
+        virtual void BindShaderInputSet(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<ShaderInputSet>& inputSet, const Ref<Pipeline>& pipeline) = 0;
+        virtual void BindShaderInputSet(const Ref<RenderCommandBuffer>& commandBuffer, uint32_t frameInFlight, const Ref<ShaderInputSet>& inputSet, const Ref<Pipeline>& pipeline) = 0;
 
         virtual void Draw(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
         virtual void Draw(const Ref<RenderCommandBuffer>& commandBuffer, uint32_t frameInFlight, const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;

@@ -18,33 +18,32 @@ namespace flux
         vsModule_ = CreateShaderModule(device, vertexPath);
         fsModule_ = CreateShaderModule(device, fragmentPath);
 
-        std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
-        
-        for (const auto& element : layout.Elements())
+        descriptorSetLayout_.resize(layout.SetLayouts().size());
+        for (size_t i = 0; i < descriptorSetLayout_.size(); i++)
         {
-            VkDescriptorSetLayoutBinding binding{};
-            binding.binding = element.binding;
-            binding.descriptorType = FluxUniformTypeToVulkan(element.type);
-            binding.stageFlags = FluxShaderStageFlagsToVulkan(element.shaderStage);
-            binding.descriptorCount = 1;
-            binding.pImmutableSamplers = nullptr;
+            const auto& setLayout = layout.SetLayouts()[i];
+            std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
 
-            layoutBindings.push_back(binding);
+            for (const auto& element : setLayout)
+            {
+                VkDescriptorSetLayoutBinding binding{};
+                binding.binding = element.binding;
+                binding.descriptorType = FluxUniformTypeToVulkan(element.type);
+                binding.stageFlags = FluxShaderStageFlagsToVulkan(element.shaderStage);
+                binding.descriptorCount = 1;
+                binding.pImmutableSamplers = nullptr;
+
+                layoutBindings.push_back(binding);
+            }
+
+            VkDescriptorSetLayoutCreateInfo layoutInfo{};
+            layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+            layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
+            layoutInfo.pBindings = layoutBindings.data();
+
+            VkResult result = vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout_[i]);
+            DBG_ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout");
         }
-
-        VkDescriptorSetLayoutCreateInfo layoutInfo{};
-        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
-        layoutInfo.pBindings = layoutBindings.data();
-
-        VkResult result = vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout_);
-        DBG_ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout");
-
-        std::vector<VkDescriptorSetLayout> descriptorSetLayouts(VulkanFramesInFlight());
-        for (uint32_t i = 0; i < VulkanFramesInFlight(); i++)
-            descriptorSetLayouts[i] = descriptorSetLayout_;
-
-        descriptorSets_ = deviceRef->DescriptorPool()->AllocateDescriptorSet(descriptorSetLayouts);
     }
 
     VulkanShader::~VulkanShader()
@@ -52,61 +51,11 @@ namespace flux
         Ref<VulkanDevice> device = VulkanContext::Device();
         device->Idle();
 
-        device->DescriptorPool()->FreeDescriptorSet(descriptorSets_);
-        vkDestroyDescriptorSetLayout(device->NativeVulkanDevice(), descriptorSetLayout_, nullptr);
+        for (const auto& layout : descriptorSetLayout_)
+            vkDestroyDescriptorSetLayout(device->NativeVulkanDevice(), layout, nullptr);
 
         vkDestroyShaderModule(device->NativeVulkanDevice(), vsModule_, nullptr);
         vkDestroyShaderModule(device->NativeVulkanDevice(), fsModule_, nullptr);
-    }
-
-    void VulkanShader::PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding) const
-    {
-        for (uint32_t i = 0; i < static_cast<uint32_t>(descriptorSets_.size()); i++)
-        {
-            PushUniformBuffer(ub, binding, i);
-        }
-    }
-
-    void VulkanShader::PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding, uint32_t index) const
-    {
-        Ref<VulkanUniformBuffer> vulkanUb = std::dynamic_pointer_cast<VulkanUniformBuffer>(ub);
-
-        VkWriteDescriptorSet write{};
-        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        write.dstSet = descriptorSets_[index];
-        write.dstBinding = binding;
-        write.dstArrayElement = 0;
-        write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        write.descriptorCount = 1;
-        write.pBufferInfo = &vulkanUb->DescriptorBufferInfo();
-
-        VkDevice device = VulkanContext::Device()->NativeVulkanDevice();
-        vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
-    }
-
-    void VulkanShader::PushSampler(const Ref<Image>& image, uint32_t binding) const
-    {
-        for (uint32_t i = 0; i < static_cast<uint32_t>(descriptorSets_.size()); i++)
-        {
-            PushSampler(image, binding, i);
-        }
-    }
-
-    void VulkanShader::PushSampler(const Ref<Image>& image, uint32_t binding, uint32_t index) const
-    {
-        Ref<VulkanImage> vulkanImage = std::dynamic_pointer_cast<VulkanImage>(image);
-
-        VkWriteDescriptorSet write{};
-        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        write.dstSet = descriptorSets_[index];
-        write.dstBinding = binding;
-        write.dstArrayElement = 0;
-        write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        write.descriptorCount = 1;
-        write.pImageInfo = &vulkanImage->DescriptorImageInfo();
-
-        VkDevice device = VulkanContext::Device()->NativeVulkanDevice();
-        vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
     }
 
     static std::vector<uint8_t> ReadFileAsBytes(const std::string& path)

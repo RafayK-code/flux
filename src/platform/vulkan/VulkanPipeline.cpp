@@ -168,12 +168,12 @@ namespace flux
         * TODO: Build the layout from the shader (UBO and push constant) and vertex array layout
         */
 
-        VkDescriptorSetLayout descriptorLayout = vulkanShader->DescriptorSetLayout();
+        const std::vector<VkDescriptorSetLayout>& descriptorLayout = vulkanShader->DescriptorSetLayout();
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = vulkanShader->DescriptorSetLayoutCount();
-        pipelineLayoutInfo.pSetLayouts = &descriptorLayout;
+        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorLayout.size());
+        pipelineLayoutInfo.pSetLayouts = descriptorLayout.data();
         pipelineLayoutInfo.pushConstantRangeCount = 0;
         pipelineLayoutInfo.pPushConstantRanges = nullptr;
 

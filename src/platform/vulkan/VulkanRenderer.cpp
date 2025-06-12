@@ -7,6 +7,7 @@
 #include <platform/vulkan/VulkanIndexBuffer.h>
 #include <platform/vulkan/VulkanShader.h>
 #include <platform/vulkan/VulkanRenderCommandBuffer.h>
+#include <platform/vulkan/VulkanShaderInputSet.h>
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -116,10 +117,20 @@ namespace flux
         scissor.offset = { viewportOffset_.x, viewportOffset_.y };
         scissor.extent = { viewportExtent_.x, viewportExtent_.y };
         vkCmdSetScissor(vulkanCommandBuffer->GetNativeCommandBuffer(frameInFlight), 0, 1, &scissor);
+    }
 
-        // bad but since shaders are composed of a descriptor set we need to do this here
-        Ref<VulkanShader> vkShader = std::dynamic_pointer_cast<VulkanShader>(pipeline->GetShader());
-        VkDescriptorSet set = vkShader->DescriptorSet(currentFrameInFlight_);
+    void VulkanRenderer::BindShaderInputSet(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<ShaderInputSet>& inputSet, const Ref<Pipeline>& pipeline)
+    {
+        BindShaderInputSet(commandBuffer, currentFrameInFlight_, inputSet, pipeline);
+    }
+
+    void VulkanRenderer::BindShaderInputSet(const Ref<RenderCommandBuffer>& commandBuffer, uint32_t frameInFlight, const Ref<ShaderInputSet>& inputSet, const Ref<Pipeline>& pipeline)
+    {
+        Ref<VulkanRenderCommandBuffer> vulkanCommandBuffer = std::dynamic_pointer_cast<VulkanRenderCommandBuffer>(commandBuffer);
+        Ref<VulkanPipeline> vkPipeline = std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
+        Ref<VulkanShaderInputSet> vkInputSet = std::dynamic_pointer_cast<VulkanShaderInputSet>(inputSet);
+
+        VkDescriptorSet set = vkInputSet->DescriptorSet(frameInFlight);
         vkCmdBindDescriptorSets(vulkanCommandBuffer->GetNativeCommandBuffer(frameInFlight), VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline->PipelineLayout(), 0, 1, &set, 0, nullptr);
     }
 

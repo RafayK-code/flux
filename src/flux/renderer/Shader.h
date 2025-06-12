@@ -37,26 +37,42 @@ namespace flux
 
         std::string name;
         uint32_t binding;
-        uint32_t set = 0;
         UniformType type;
         ShaderStageFlags shaderStage;
+    };
+
+    class ShaderUniformSetLayout
+    {
+    public:
+        ShaderUniformSetLayout(uint32_t set, std::initializer_list<ShaderUniformElement> elements) : elements_(elements) {}
+        ~ShaderUniformSetLayout() = default;
+
+        inline const std::vector<ShaderUniformElement>& Elements() const { return elements_; }
+
+        inline std::vector<ShaderUniformElement>::iterator begin() { return elements_.begin(); }
+        inline std::vector<ShaderUniformElement>::iterator end() { return elements_.end(); }
+        inline std::vector<ShaderUniformElement>::const_iterator begin() const { return elements_.begin(); }
+        inline std::vector<ShaderUniformElement>::const_iterator end() const { return elements_.end(); }
+
+    private:
+        std::vector<ShaderUniformElement> elements_;
     };
 
     class ShaderUniformLayout
     {
     public:
-        ShaderUniformLayout(std::initializer_list<ShaderUniformElement> elements) : elements_(elements) {}
+        ShaderUniformLayout(std::initializer_list<ShaderUniformSetLayout> setLayouts) : setLayouts_(setLayouts) {}
         ~ShaderUniformLayout() = default;
 
-        inline const std::vector<ShaderUniformElement>& Elements() const { return elements_; }
+        inline const std::vector<ShaderUniformSetLayout>& SetLayouts() const { return setLayouts_; }
 
-        inline std::vector<ShaderUniformElement>::iterator Begin() { return elements_.begin(); }
-        inline std::vector<ShaderUniformElement>::iterator End() { return elements_.end(); }
-        inline std::vector<ShaderUniformElement>::const_iterator Begin() const { return elements_.begin(); }
-        inline std::vector<ShaderUniformElement>::const_iterator End() const { return elements_.end(); }
+        inline std::vector<ShaderUniformSetLayout>::iterator begin() { return setLayouts_.begin(); }
+        inline std::vector<ShaderUniformSetLayout>::iterator end() { return setLayouts_.end(); }
+        inline std::vector<ShaderUniformSetLayout>::const_iterator begin() const { return setLayouts_.begin(); }
+        inline std::vector<ShaderUniformSetLayout>::const_iterator end() const { return setLayouts_.end(); }
 
     private:
-        std::vector<ShaderUniformElement> elements_;
+        std::vector<ShaderUniformSetLayout> setLayouts_;
     };
 
     class Shader : public RefCounted
@@ -68,11 +84,5 @@ namespace flux
 
         virtual void Bind() = 0;
         virtual void Unbind() = 0;
-
-        virtual void PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding) const = 0;
-        virtual void PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding, uint32_t index) const = 0;
-
-        virtual void PushSampler(const Ref<Image>& image, uint32_t binding) const = 0;
-        virtual void PushSampler(const Ref<Image>& image, uint32_t binding, uint32_t index) const = 0;
     };
 }

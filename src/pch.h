@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <numeric>
 #include <fstream>
+#include <sstream>
 
 #include <flux/core/base.h>
 #include <flux/core/LogManager.h>

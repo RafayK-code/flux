@@ -17,25 +17,16 @@ namespace flux
         virtual void Bind() override {};
         virtual void Unbind() override {};
 
-        virtual void PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding) const override;
-        virtual void PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding, uint32_t index) const override;
-
-        virtual void PushSampler(const Ref<Image>& image, uint32_t binding) const override;
-        virtual void PushSampler(const Ref<Image>& image, uint32_t binding, uint32_t index) const override;
-
         VkShaderModule VertexShaderModule() const { return vsModule_; }
         VkShaderModule FragmentShaderModule() const { return fsModule_; }
 
-        VkDescriptorSetLayout DescriptorSetLayout() const { return descriptorSetLayout_; }
-        uint32_t DescriptorSetLayoutCount() const { return 1; }
-
-        VkDescriptorSet DescriptorSet(uint32_t index) const { return descriptorSets_[index]; }
+        std::vector<VkDescriptorSetLayout> DescriptorSetLayout() const { return descriptorSetLayout_; }
+        VkDescriptorSetLayout DescriptorSetLayout(uint32_t set) const { return descriptorSetLayout_[set]; }
 
     private:
         VkShaderModule vsModule_;
         VkShaderModule fsModule_;
 
-        VkDescriptorSetLayout descriptorSetLayout_;
-        std::vector<VkDescriptorSet> descriptorSets_;
+        std::vector<VkDescriptorSetLayout> descriptorSetLayout_;
     };
 }

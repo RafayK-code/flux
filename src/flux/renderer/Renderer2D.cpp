@@ -1,5 +1,4 @@
 #include <pch.h>
-
 #include <flux/renderer/Renderer2D.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -55,10 +54,10 @@ namespace flux
         }
 
         // todo: we should create a shader cache
-        ShaderUniformLayout layout = {
+        ShaderUniformLayout layout = { {0, {
             { "u_ViewProjection", 0, UniformType::UniformBuffer, ShaderStage::Vertex },
             { "u_Texture", 1, UniformType::Sampler, ShaderStage::Fragment },
-        };
+        }} };
         Ref<Shader> quadShader = Shader::Create("assets/shaders/textured_quad.vert.spv", "assets/shaders/textured_quad.frag.spv", layout);
 
         PipelineSpecification quadPipelineSpec{};
@@ -77,7 +76,8 @@ namespace flux
         viewProjectionUB_ = UniformBuffer::Create(sizeof(float) * 16);
         viewProjectionUB_->SetData(glm::value_ptr(camera_->ViewProjectionMatrix()), sizeof(float) * 16);
 
-        quadShader->PushUniformBuffer(viewProjectionUB_, 0);
+        batchData_->quadShaderInput = ShaderInputSet::Create(quadShader);
+        batchData_->quadShaderInput->PushUniformBuffer(viewProjectionUB_, 0);
 
         batchData_->quadVertexPositions[0] = { -0.5f, 0.5f, 0.0f, 1.0f };
         batchData_->quadVertexPositions[1] = { 0.5f, 0.5f, 0.0f, 1.0f };
@@ -139,6 +139,7 @@ namespace flux
             currVertexBuffer->SetData(batchData_->quadVertexBufferBase, size);
 
             renderer_->BindPipeline(batchData_->commandBuffer_, batchData_->quadPipeline);
+            renderer_->BindShaderInputSet(batchData_->commandBuffer_, batchData_->quadShaderInput, batchData_->quadPipeline);
             //renderer_->Draw(batchData_->quadRenderPass, batchData_->quadVertexArrays[currFrameInFlight], batchData_->quadIndexCount);
             renderer_->Draw(batchData_->commandBuffer_, batchData_->quadVertexArrays[currFrameInFlight], batchData_->quadIndexCount);
         }
@@ -152,7 +153,7 @@ namespace flux
         if (batchData_->quadIndexCount >= maxIndices_)
             EndBatch();
 
-        batchData_->quadRenderPass->GetShader()->PushSampler(image, 1, renderer_->CurrentFrameInFlight());
+        batchData_->quadShaderInput->PushSampler(image, 1, renderer_->CurrentFrameInFlight());
 
         for (size_t i = 0; i < quadVertexCount; i++)
         {

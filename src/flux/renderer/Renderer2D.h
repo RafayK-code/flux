@@ -48,6 +48,7 @@ namespace flux
             std::vector<Ref<VertexBuffer>> quadVertexBuffers;
             std::vector<Ref<VertexArray>> quadVertexArrays;
             Ref<Pipeline> quadPipeline;
+            Ref<ShaderInputSet> quadShaderInput;
             Ref<RenderPass> quadRenderPass;
             Ref<RenderCommandBuffer> commandBuffer_;
 

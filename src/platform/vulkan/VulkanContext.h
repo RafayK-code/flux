@@ -24,7 +24,7 @@ namespace flux
         virtual void BindContext() override {}
         virtual void SwapBuffers() override {}
 
-        virtual void OnWindowResize(uint32_t width, uint32_t height);
+        virtual void OnWindowResize(uint32_t width, uint32_t height) override;
 
         virtual uint32_t FramesInFlight() const override { return VulkanFramesInFlight(); }
 

@@ -49,7 +49,7 @@ namespace flux
         int width, height;
         glfwGetWindowSize(windowHandle_, &width, &height);
 
-        VulkanSwapchainCreateProps props = { width, height, true };
+        VulkanSwapchainCreateProps props = { static_cast<uint32_t>(width), static_cast<uint32_t>(height), true };
         swapchain_ = CreateRef<VulkanSwapchain>(vulkanInstance_, device_, surface_, props);
 
         vulkanContextCount++;

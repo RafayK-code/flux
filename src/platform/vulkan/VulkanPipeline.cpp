@@ -14,12 +14,47 @@ namespace flux
     static VkFormat FluxShaderDataTypeToVulkan(ShaderDataType type);
 
     VulkanPipeline::VulkanPipeline(const PipelineSpecification& specification)
+        : pipeline_(nullptr), pipelineLayout_(nullptr)
     {
         specification_ = specification;
+        Invalidate();
+    }
+
+    VulkanPipeline::~VulkanPipeline()
+    {
+        Ref<VulkanDevice> device = VulkanContext::Device();
+        device->Idle();
+
+        vkDestroyPipeline(device->NativeVulkanDevice(), pipeline_, nullptr);
+        vkDestroyPipelineLayout(device->NativeVulkanDevice(), pipelineLayout_, nullptr);
+    }
+
+    void VulkanPipeline::Invalidate()
+    {
         Ref<VulkanDevice> device = VulkanContext::Device();
 
-        //Ref<VulkanShader> vulkanShader = Ref<VulkanShader>(dynamic_cast<VulkanShader*>(specification_.shader.get()));
+        if (pipeline_)
+        {
+            device->Idle();
+
+            vkDestroyPipeline(device->NativeVulkanDevice(), pipeline_, nullptr);
+        }
+        
         Ref<VulkanShader> vulkanShader = std::dynamic_pointer_cast<VulkanShader>(specification_.shader);
+
+        if (!pipelineLayout_)
+        {
+            const std::vector<VkDescriptorSetLayout>& descriptorLayout = vulkanShader->DescriptorSetLayout();
+
+            VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+            pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+            pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorLayout.size());
+            pipelineLayoutInfo.pSetLayouts = descriptorLayout.data();
+            pipelineLayoutInfo.pushConstantRangeCount = 0;
+            pipelineLayoutInfo.pPushConstantRanges = nullptr;
+
+            vkCreatePipelineLayout(device->NativeVulkanDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout_);
+        }
 
         VkPipelineShaderStageCreateInfo shaderStages[2]{};
 
@@ -163,22 +198,6 @@ namespace flux
         pipelineInfo.pColorBlendState = &colorBlendInfo;
         pipelineInfo.pDepthStencilState = &depthStencilInfo;
         pipelineInfo.pDynamicState = &dynamicStateInfo;
-
-        /**
-        * TODO: Build the layout from the shader (UBO and push constant) and vertex array layout
-        */
-
-        const std::vector<VkDescriptorSetLayout>& descriptorLayout = vulkanShader->DescriptorSetLayout();
-
-        VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorLayout.size());
-        pipelineLayoutInfo.pSetLayouts = descriptorLayout.data();
-        pipelineLayoutInfo.pushConstantRangeCount = 0;
-        pipelineLayoutInfo.pPushConstantRanges = nullptr;
-
-        vkCreatePipelineLayout(device->NativeVulkanDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout_);
-
         pipelineInfo.layout = pipelineLayout_;
         if (specification_.framebuffer)
         {
@@ -194,20 +213,6 @@ namespace flux
         VkResult result = vkCreateGraphicsPipelines(device->NativeVulkanDevice(), nullptr, 1, &pipelineInfo, nullptr, &pipeline_);
 
         DBG_ASSERT(result == VK_SUCCESS, "Failed to create graphics pipeline");
-    }
-
-    VulkanPipeline::~VulkanPipeline()
-    {
-        Ref<VulkanDevice> device = VulkanContext::Device();
-        device->Idle();
-
-        vkDestroyPipeline(device->NativeVulkanDevice(), pipeline_, nullptr);
-        vkDestroyPipelineLayout(device->NativeVulkanDevice(), pipelineLayout_, nullptr);
-    }
-
-    void VulkanPipeline::Bind(VkCommandBuffer commandBuffer) const
-    {
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
     }
 
     static VkPrimitiveTopology FluxPrimitiveTopologyToVulkan(PrimitiveTopology topology)

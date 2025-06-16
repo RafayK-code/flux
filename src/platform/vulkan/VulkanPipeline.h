@@ -16,7 +16,7 @@ namespace flux
         VulkanPipeline(const PipelineSpecification& specification);
         virtual ~VulkanPipeline();
 
-        void Bind(VkCommandBuffer commandBuffer) const;
+        virtual void Invalidate() override;
 
         VkPipeline NativePipeline() const { return pipeline_; }
         VkPipelineLayout PipelineLayout() const { return pipelineLayout_; }

@@ -37,6 +37,7 @@ namespace flux
         static Ref<Pipeline> Create(const PipelineSpecification& specification);
 
         virtual ~Pipeline() = default;
+        virtual void Invalidate() = 0;
 
         virtual PipelineSpecification& Specification() { return specification_; }
         virtual const PipelineSpecification& Specification() const { return specification_; }

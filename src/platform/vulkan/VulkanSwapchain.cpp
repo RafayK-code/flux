@@ -397,7 +397,7 @@ namespace flux
         submitInfo.commandBufferCount = static_cast<uint32_t>(commands.size());
         submitInfo.pCommandBuffers = commands.data();
         submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = &renderFinishedSemaphores_[currentFrameIndex_];
+        submitInfo.pSignalSemaphores = &renderFinishedSemaphores_[currentImageIndex_];
 
         vkResetFences(device, 1, &inFlightFences_[currentFrameIndex_]);
         VkResult result = vkQueueSubmit(device_->GraphicQueue(), 1, &submitInfo, inFlightFences_[currentFrameIndex_]);
@@ -406,7 +406,7 @@ namespace flux
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores = &renderFinishedSemaphores_[currentFrameIndex_];
+        presentInfo.pWaitSemaphores = &renderFinishedSemaphores_[currentImageIndex_];
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = &swapchain_;
         presentInfo.pImageIndices = &currentImageIndex_;

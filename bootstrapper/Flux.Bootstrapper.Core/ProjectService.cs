@@ -21,7 +21,12 @@ public class ProjectService : IProjectService
 
         Directory.CreateDirectory(Path.Combine(projectPath, assetsDir));
         Directory.CreateDirectory(Path.Combine(projectPath, sourceDir));
-        Directory.CreateDirectory(Path.Combine(projectPath, privateEngineDir));
+
+        string projectPrivateEngineDir = Path.Combine(projectPath, privateEngineDir);
+        Directory.CreateDirectory(projectPrivateEngineDir);
+
+        var attributes = File.GetAttributes(projectPrivateEngineDir);
+        File.SetAttributes(projectPrivateEngineDir, attributes | FileAttributes.Hidden);
 
         JsonSerializerOptions options = new JsonSerializerOptions
         {

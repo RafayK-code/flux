@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Flux.Bootstrapper.CLI": {
+      "commandName": "Project",
+      "commandLineArgs": "create -n dummyproj C:\\Dev\\DummyProject"
+    }
+  }
+}

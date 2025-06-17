@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Flux.Bootstrapper.CLI": {
+      "commandName": "Project"
+    }
+  }
+}

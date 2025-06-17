@@ -14,7 +14,7 @@ file(GLOB_RECURSE FLUX_RUNTIME_SRC_FILES
 )
 
 # add pch.h to sources
-list(APPEND FLUX_RUNTIME_SRC_FILES "${FLUX_RUNTIME_SRC_PATH}/pch.h")
+list(APPEND FLUX_RUNTIME_SRC_FILES "${FLUX_RUNTIME_SRC_PATH}/fxpch.h")
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/platform.cmake)
 
@@ -27,7 +27,7 @@ else()
     target_compile_definitions(${PROJECT_NAME} PUBLIC FLUX_BUILD_STATIC)
 endif()
 
-target_precompile_headers(${PROJECT_NAME} PUBLIC ${FLUX_RUNTIME_SRC_PATH}/pch.h)
+target_precompile_headers(${PROJECT_NAME} PUBLIC ${FLUX_RUNTIME_SRC_PATH}/fxpch.h)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/source_group.cmake)
 

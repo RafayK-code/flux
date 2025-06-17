@@ -1,5 +1,7 @@
 ﻿using Flux.Bootstrapper.Core.ProjectFiles;
+using System.Reflection;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Flux.Bootstrapper.Core;
 
@@ -38,5 +40,18 @@ public class ProjectService : IProjectService
 
         string metadataJson = JsonSerializer.Serialize(metadataFile, options);
         File.WriteAllText(Path.Combine(projectPath, privateEngineDir, "metadata.json"), metadataJson);
+
+        string assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        string cppTemplatePath = Path.Combine(assemblyFolder, "TemplateFiles", "main.cpp.template");
+
+        string className = IsValidCppIdentifier(name) ? name : "MyApp";
+
+        string cppTemplate = File.ReadAllText(cppTemplatePath);
+        string modifiedCppFile = cppTemplate.Replace("{{PROJECT_NAME}}", className);
+
+        string cppFile = Path.Combine(projectPath, sourceDir, "main.cpp");
+        File.WriteAllText(cppFile, modifiedCppFile);
     }
+
+    private static bool IsValidCppIdentifier(string name) => Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$");
 }

@@ -6,6 +6,9 @@ set(FLUX_ENABLE_THREADING ON CACHE BOOL "Support multithreading safety within fl
 set(FLUX_ENABLE_INTRUSIVE_REF OFF CACHE BOOL "Support multithreading safety within flux")
 set(FLUX_PATH_TO_VULKAN_SDK "" CACHE PATH "Path to the Vulkan SDK")
 
+set(FLUX_RUNTIME_SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(FLUX_RUNTIME_INC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 set(CMAKE_CXX_STANDARD 17)
 
 file(GLOB_RECURSE FLUX_RUNTIME_SRC_FILES
@@ -13,21 +16,26 @@ file(GLOB_RECURSE FLUX_RUNTIME_SRC_FILES
     "${FLUX_RUNTIME_SRC_PATH}/flux/*.h"
 )
 
+file(GLOB_RECURSE FLUX_RUNTIME_INC_FILES
+    "${FLUX_RUNTIME_INC_PATH}/flux/*.cpp"
+    "${FLUX_RUNTIME_INC_PATH}/flux/*.h"
+)
+
 # add pch.h to sources
-list(APPEND FLUX_RUNTIME_SRC_FILES "${FLUX_RUNTIME_SRC_PATH}/fxpch.h")
+list(APPEND FLUX_RUNTIME_INC_FILES "${FLUX_RUNTIME_INC_PATH}/fxpch.h")
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/platform.cmake)
 
 # handle type of library
 if(${FLUX_BUILD_SHARED})
-    add_library(${PROJECT_NAME} SHARED ${FLUX_RUNTIME_SRC_FILES})
+    add_library(${PROJECT_NAME} SHARED ${FLUX_RUNTIME_SRC_FILES} ${FLUX_RUNTIME_INC_FILES})
     target_compile_definitions(${PROJECT_NAME} PUBLIC FLUX_BUILD_SHARED)
 else()
-    add_library(${PROJECT_NAME} STATIC ${FLUX_RUNTIME_SRC_FILES})
+    add_library(${PROJECT_NAME} STATIC ${FLUX_RUNTIME_SRC_FILES} ${FLUX_RUNTIME_INC_FILES})
     target_compile_definitions(${PROJECT_NAME} PUBLIC FLUX_BUILD_STATIC)
 endif()
 
-target_precompile_headers(${PROJECT_NAME} PUBLIC ${FLUX_RUNTIME_SRC_PATH}/fxpch.h)
+target_precompile_headers(${PROJECT_NAME} PUBLIC ${FLUX_RUNTIME_INC_PATH}/fxpch.h)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/source_group.cmake)
 
@@ -58,7 +66,7 @@ if(${FLUX_ENABLE_THREADING})
     target_compile_definitions(${PROJECT_NAME} PUBLIC FLUX_THREADSAFE)
 endif()
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${FLUX_RUNTIME_SRC_PATH})
+target_include_directories(${PROJECT_NAME} PUBLIC ${FLUX_RUNTIME_INC_PATH})
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLAD_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${SPDLOG_PATH}/include)

@@ -23,6 +23,7 @@ file(GLOB_RECURSE FLUX_RUNTIME_INC_FILES
 
 # add pch.h to sources
 list(APPEND FLUX_RUNTIME_INC_FILES "${FLUX_RUNTIME_INC_PATH}/fxpch.h")
+list(APPEND FLUX_RUNTIME_INC_FILES "${FLUX_RUNTIME_INC_PATH}/flux.h")
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/platform.cmake)
 

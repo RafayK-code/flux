@@ -12,7 +12,7 @@ namespace flux
         Ref<Pipeline> pipeline;
     };
 
-    class RenderPass : public RefCounted
+    class FLUX_API RenderPass : public RefCounted
     {
     public:
         RenderPass(const Ref<Pipeline> pipeline) : pipeline_(pipeline) {}

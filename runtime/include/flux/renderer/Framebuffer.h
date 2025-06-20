@@ -45,7 +45,7 @@ namespace flux
         uint32_t samples = 1;
     };
 
-    class Framebuffer : public RefCounted
+    class FLUX_API Framebuffer : public RefCounted
     {
     public:
         static Ref<Framebuffer> Create(const FramebufferSpecification& specification);

@@ -77,7 +77,7 @@ namespace flux
         uint32_t layerCount = 1;
     };
 
-    class Image : public RefCounted
+    class FLUX_API Image : public RefCounted
     {
     public:
         static Ref<Image> Create(const ImageSpecification& specification);

@@ -12,7 +12,7 @@ namespace flux
         Ref<GraphicsContext> graphicsContext;
     };
 
-    class Renderer2D
+    class FLUX_API Renderer2D
     {
     public:
         Renderer2D(const Renderer2DSpecification& spec);

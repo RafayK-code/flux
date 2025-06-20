@@ -5,7 +5,7 @@
 
 namespace flux
 {
-    class VertexArray : public RefCounted
+    class FLUX_API VertexArray : public RefCounted
     {
     public:
         static Ref<VertexArray> Create();

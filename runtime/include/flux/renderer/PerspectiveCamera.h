@@ -8,7 +8,7 @@
 
 namespace flux
 {
-    class PerspectiveCamera : public RefCounted
+    class FLUX_API PerspectiveCamera : public RefCounted
     {
     public:
         PerspectiveCamera(float fov, float aspectRatio, float near, float far);

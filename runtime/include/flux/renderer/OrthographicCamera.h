@@ -14,7 +14,7 @@ namespace flux
     * allowing that for an orthographic camera just looks really fucked up and funky. We probably will keep this as a pseudo-camera as
     * it makes far more sense to
     */
-    class OrthographicCamera : public RefCounted
+    class FLUX_API OrthographicCamera : public RefCounted
     {
     public:
         OrthographicCamera(float width, float height, float near, float far);

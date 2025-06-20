@@ -5,7 +5,7 @@
 
 namespace flux
 {
-    class IndexBuffer : public RefCounted
+    class FLUX_API IndexBuffer : public RefCounted
     {
     public:
         static Ref<IndexBuffer> Create(const uint32_t* data, uint32_t count);

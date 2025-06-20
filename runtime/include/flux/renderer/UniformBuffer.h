@@ -5,7 +5,7 @@
 
 namespace flux
 {
-    class UniformBuffer : public RefCounted
+    class FLUX_API UniformBuffer : public RefCounted
     {
     public:
         static Ref<UniformBuffer> Create(uint32_t size);

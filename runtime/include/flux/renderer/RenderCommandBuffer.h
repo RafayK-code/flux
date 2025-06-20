@@ -7,7 +7,7 @@
 
 namespace flux
 {
-    class RenderCommandBuffer : public RefCounted
+    class FLUX_API RenderCommandBuffer : public RefCounted
     {
     public:
         static Ref<RenderCommandBuffer> Create(const Ref<GraphicsContext>& graphicsContext);

@@ -5,7 +5,7 @@
 
 namespace flux
 {
-    class ShaderInputSet : public RefCounted
+    class FLUX_API ShaderInputSet : public RefCounted
     {
     public:
         static Ref<ShaderInputSet> Create(const Ref<Shader>& shader, uint32_t set = 0);

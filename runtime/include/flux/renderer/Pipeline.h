@@ -31,7 +31,7 @@ namespace flux
         VertexBufferLayout layout{};
     };
 
-    class Pipeline : public RefCounted
+    class FLUX_API Pipeline : public RefCounted
     {
     public:
         static Ref<Pipeline> Create(const PipelineSpecification& specification);

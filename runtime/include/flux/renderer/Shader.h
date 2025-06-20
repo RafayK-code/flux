@@ -27,7 +27,7 @@ namespace flux
 
     using ShaderStageFlags = uint8_t;
 
-    class ShaderUniformElement
+    class FLUX_API ShaderUniformElement
     {
     public:
         ShaderUniformElement() = default;
@@ -41,7 +41,7 @@ namespace flux
         ShaderStageFlags shaderStage;
     };
 
-    class ShaderUniformSetLayout
+    class FLUX_API ShaderUniformSetLayout
     {
     public:
         ShaderUniformSetLayout(uint32_t set, std::initializer_list<ShaderUniformElement> elements) : elements_(elements) {}
@@ -58,7 +58,7 @@ namespace flux
         std::vector<ShaderUniformElement> elements_;
     };
 
-    class ShaderUniformLayout
+    class FLUX_API ShaderUniformLayout
     {
     public:
         ShaderUniformLayout(std::initializer_list<ShaderUniformSetLayout> setLayouts) : setLayouts_(setLayouts) {}
@@ -75,7 +75,7 @@ namespace flux
         std::vector<ShaderUniformSetLayout> setLayouts_;
     };
 
-    class Shader : public RefCounted
+    class FLUX_API Shader : public RefCounted
     {
     public:
         static Ref<Shader> Create(const std::string& vertexPath, const std::string& fragmentPath, const ShaderUniformLayout& layout);

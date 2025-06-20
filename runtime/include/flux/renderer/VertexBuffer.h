@@ -18,7 +18,7 @@ namespace flux
 
     uint32_t ShaderDataTypeSize(ShaderDataType type);
 
-    class VertexBufferElement
+    class FLUX_API VertexBufferElement
     {
     public:
         VertexBufferElement() = default;
@@ -35,7 +35,7 @@ namespace flux
         bool normalized;
     };
 
-    class VertexBufferLayout
+    class FLUX_API VertexBufferLayout
     {
     public:
         VertexBufferLayout(std::initializer_list<VertexBufferElement> elements);
@@ -57,7 +57,7 @@ namespace flux
         uint32_t stride_ = 0;
     };
 
-    class VertexBuffer : public RefCounted
+    class FLUX_API VertexBuffer : public RefCounted
     {
     public:
         enum class Usage

@@ -18,8 +18,5 @@
 #include <flux/core/base.h>
 #include <flux/core/LogManager.h>
 
-#include <vulkan/vulkan.h>
-#include <glad/glad.h>
-
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL

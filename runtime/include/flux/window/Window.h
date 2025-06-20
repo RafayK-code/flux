@@ -5,14 +5,13 @@
 
 #include <flux/renderer/GraphicsContext.h>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include <string>
+
+struct GLFWwindow;
 
 namespace flux
 {
-    struct WindowProps
+    struct FLUX_API WindowProps
     {
         std::string title;
         uint32_t width;

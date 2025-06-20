@@ -2,6 +2,9 @@
 
 #include <flux/window/Window.h>
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 namespace flux
 {
     static uint8_t glfwWindowCount = 0;

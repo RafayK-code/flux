@@ -1,74 +1,107 @@
 #pragma once
 
 #include <flux/core/base.h>
-#include <flux/util/Singleton.h>
+#include <flux/core/Ref.h>
 
-#include <spdlog/spdlog.h>
+#include <format>
 #include <memory>
 #include <string>
 
 namespace flux
 {
-    /**
-    * Simple wrapper over a spdlog logger
-    */
     class FLUX_API Logger
     {
     public:
         Logger(const std::string& name);
         ~Logger();
 
-        template <typename... Args>
-        using FormatString = spdlog::format_string_t<Args...>;
-
-        using SourceLoc = spdlog::source_loc;
-
         enum class Level
         {
-            Info        = spdlog::level::info,
-            Warn        = spdlog::level::warn,
-            Error       = spdlog::level::err,
-            Critical    = spdlog::level::critical,
+            Info,
+            Warn,
+            Error,
+            Critical,
         };
 
-        inline std::shared_ptr<spdlog::logger> IntenralLogger() { return logger_; }
-
-        template <typename... Args>
-        void Log(const SourceLoc& loc, Level level, FormatString<Args...> fmt, Args&&... args)
+        struct SourceLoc
         {
-            logger_->log(loc, static_cast<spdlog::level::level_enum>(level), fmt, std::forward<Args>(args)...);
-        }
+            const char* filename;
+            int line;
+            const char* funcname;
+        };
 
-        template<typename... Args>
-        void Info(const SourceLoc& loc, FormatString<Args...> fmt, Args&&... args)
-        {
-            logger_->log(loc, static_cast<spdlog::level::level_enum>(Level::Info), fmt, std::forward<Args>(args)...);
-        }
-
-        template<typename... Args>
-        void Warn(const SourceLoc& loc, FormatString<Args...> fmt, Args&&... args)
-        {
-            logger_->log(loc, static_cast<spdlog::level::level_enum>(Level::Warn), fmt, std::forward<Args>(args)...);
-        }
-
-        template<typename... Args>
-        void Error(const SourceLoc& loc, FormatString<Args...> fmt, Args&&... args)
-        {
-            logger_->log(loc, static_cast<spdlog::level::level_enum>(Level::Error), fmt, std::forward<Args>(args)...);
-        }
-
-        template<typename... Args>
-        void Critical(const SourceLoc& loc, FormatString<Args...> fmt, Args&&... args)
-        {
-            logger_->log(loc, static_cast<spdlog::level::level_enum>(Level::Critical), fmt, std::forward<Args>(args)...);
-        }
+        void Log(const SourceLoc& loc, Level level, const std::string& message);
+        void Info(const SourceLoc& loc, const std::string& message);
+        void Warn(const SourceLoc& loc, const std::string& message);
+        void Error(const SourceLoc& loc, const std::string& message);
+        void Critical(const SourceLoc& loc, const std::string& message);
 
     private:
-        std::shared_ptr<spdlog::logger> logger_;
+
+        class Impl;
+        Impl* impl_;
     };
+
+    template<typename... Args>
+    inline void LogInfo(Logger& logger, const Logger::SourceLoc& loc, const std::string& fmt, Args&&... args)
+    {
+        if constexpr (sizeof...(args) == 0)
+        {
+            logger.Info(loc, fmt);
+        }
+        else
+        {
+            logger.Info(loc, std::vformat(fmt, std::make_format_args(args...)));
+        }
+    }
+
+    template<typename... Args>
+    inline void LogWarn(Logger& logger, const Logger::SourceLoc& loc, const std::string& fmt, Args&&... args)
+    {
+        if constexpr (sizeof...(args) == 0)
+        {
+            logger.Warn(loc, fmt);
+        }
+        else
+        {
+            logger.Warn(loc, std::vformat(fmt, std::make_format_args(args...)));
+        }
+    }
+
+    template<typename... Args>
+    inline void LogError(Logger& logger, const Logger::SourceLoc& loc, const std::string& fmt, Args&&... args)
+    {
+        if constexpr (sizeof...(args) == 0)
+        {
+            logger.Error(loc, fmt);
+        }
+        else
+        {
+            logger.Error(loc, std::vformat(fmt, std::make_format_args(args...)));
+        }
+    }
+
+    template<typename... Args>
+    inline void LogCritical(Logger& logger, const Logger::SourceLoc& loc, const std::string& fmt, Args&&... args)
+    {
+        if constexpr (sizeof...(args) == 0)
+        {
+            logger.Critical(loc, fmt);
+        }
+        else
+        {
+            logger.Critical(loc, std::vformat(fmt, std::make_format_args(args...)));
+        }
+    }
 }
 
 /**
 * Util macro to quickly create a source location (needs to be a macro)
 */
-#define CREATE_NEW_SOURCE_LOC flux::Logger::SourceLoc{ __FILE__, __LINE__, SPDLOG_FUNCTION }
+#ifndef FLUX_FUNCTION
+    #define FLUX_FUNCTION  static_cast<const char *>(__FUNCTION__)
+#endif
+
+#ifndef CREATE_NEW_SOURCE_LOC
+    #define CREATE_NEW_SOURCE_LOC flux::Logger::SourceLoc{ __FILE__, __LINE__, FLUX_FUNCTION }
+#endif

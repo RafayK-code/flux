@@ -1,30 +1,46 @@
 file(GLOB FLUX_CORE
     "${FLUX_RUNTIME_SRC_PATH}/flux/core/*.h"
     "${FLUX_RUNTIME_SRC_PATH}/flux/core/*.cpp"
+
+    "${FLUX_RUNTIME_INC_PATH}/flux/core/*.h"
+    "${FLUX_RUNTIME_INC_PATH}/flux/core/*.cpp"
 )
 
 file(GLOB FLUX_CORE_DELEGATE
     "${FLUX_RUNTIME_SRC_PATH}/flux/core/delegate/*.h"
     "${FLUX_RUNTIME_SRC_PATH}/flux/core/delegate/*.cpp"
+
+    "${FLUX_RUNTIME_INC_PATH}/flux/core/delegate/*.h"
+    "${FLUX_RUNTIME_INC_PATH}/flux/core/delegate/*.cpp"
 )
 
 file(GLOB FLUX_UTIL
     "${FLUX_RUNTIME_SRC_PATH}/flux/util/*.h"
     "${FLUX_RUNTIME_SRC_PATH}/flux/util/*.cpp"
+
+    "${FLUX_RUNTIME_INC_PATH}/flux/util/*.h"
+    "${FLUX_RUNTIME_INC_PATH}/flux/util/*.cpp"
 )
 
 file(GLOB FLUX_WINDOW
     "${FLUX_RUNTIME_SRC_PATH}/flux/window/*.h"
     "${FLUX_RUNTIME_SRC_PATH}/flux/window/*.cpp"
+
+    "${FLUX_RUNTIME_INC_PATH}/flux/window/*.h"
+    "${FLUX_RUNTIME_INC_PATH}/flux/window/*.cpp"
 )
 
 file(GLOB FLUX_RENDERER
     "${FLUX_RUNTIME_SRC_PATH}/flux/renderer/*.h"
     "${FLUX_RUNTIME_SRC_PATH}/flux/renderer/*.cpp"
+
+    "${FLUX_RUNTIME_INC_PATH}/flux/renderer/*.h"
+    "${FLUX_RUNTIME_INC_PATH}/flux/renderer/*.cpp"
 )
 
 set(FLUX_GEN
-    "${FLUX_RUNTIME_SRC_PATH}/pch.h"
+    "${FLUX_RUNTIME_INC_PATH}/fxpch.h"
+    "${FLUX_RUNTIME_INC_PATH}/flux.h"
 )
 
 #platform specific (because of the way source group works, we dont need to check if these are actually in sources or not)
@@ -32,11 +48,17 @@ set(FLUX_GEN
 file(GLOB FLUX_OPENGL
     "${FLUX_RUNTIME_SRC_PATH}/platform/opengl/*.h"
     "${FLUX_RUNTIME_SRC_PATH}/platform/opengl/*.cpp"
+
+    "${FLUX_RUNTIME_INC_PATH}/platform/opengl/*.h"
+    "${FLUX_RUNTIME_INC_PATH}/platform/opengl/*.cpp"
 )
 
 file(GLOB FLUX_VULKAN
     "${FLUX_RUNTIME_SRC_PATH}/platform/vulkan/*.h"
     "${FLUX_RUNTIME_SRC_PATH}/platform/vulkan/*.cpp"
+
+    "${FLUX_RUNTIME_INC_PATH}/platform/vulkan/*.h"
+    "${FLUX_RUNTIME_INC_PATH}/platform/vulkan/*.cpp"
 )
 
 source_group("gen" FILES ${FLUX_GEN})

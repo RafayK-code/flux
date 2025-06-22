@@ -5,7 +5,6 @@ find_package(Vulkan REQUIRED)
 
 add_subdirectory(extern)
 
-set(FLUX_RUNTIME_SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/runtime)
 set(GLFW_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/glfw)
 set(GLAD_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/glad)
 set(SPDLOG_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/spdlog)

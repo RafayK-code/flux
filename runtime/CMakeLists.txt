@@ -6,6 +6,17 @@ set(FLUX_ENABLE_THREADING ON CACHE BOOL "Support multithreading safety within fl
 set(FLUX_ENABLE_INTRUSIVE_REF OFF CACHE BOOL "Support multithreading safety within flux")
 set(FLUX_PATH_TO_VULKAN_SDK "" CACHE PATH "Path to the Vulkan SDK")
 
+find_package(Vulkan REQUIRED)
+
+add_subdirectory(extern)
+
+set(GLFW_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/glfw)
+set(GLAD_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/glad)
+set(SPDLOG_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/spdlog)
+set(VMA_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/vma)
+set(STB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/stb)
+set(GLM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/glm)
+
 set(FLUX_RUNTIME_SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(FLUX_RUNTIME_INC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

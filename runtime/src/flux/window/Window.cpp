@@ -2,6 +2,8 @@
 
 #include <flux/window/Window.h>
 
+#include <flux/events/WindowEvent.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -33,7 +35,7 @@ namespace flux
         window_ = glfwCreateWindow(static_cast<int>(data_.width), static_cast<int>(data_.height), data_.title.c_str(), nullptr, nullptr);
         glfwWindowCount++;
 
-        context_ = GraphicsContext::Create(window_);
+        data_.context = GraphicsContext::Create(window_);
 
         glfwSetWindowUserPointer(window_, &data_);
 
@@ -42,12 +44,17 @@ namespace flux
             WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
             data->width = static_cast<uint32_t>(width);
             data->height = static_cast<uint32_t>(height);
+
+            data->context->OnWindowResize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+
+            WindowResizeEvent e(data->width, data->height);
+            data->dispatcher.DispatchEvent(e);
         });
     }
 
     Window::~Window()
     {
-        context_.reset();
+        data_.context.reset();
         glfwDestroyWindow(window_);
         glfwWindowCount--;
 
@@ -58,13 +65,12 @@ namespace flux
     void Window::Update()
     {
         glfwPollEvents();
-        context_->SwapBuffers();
+        data_.context->SwapBuffers();
     }
 
     void Window::Resize(uint32_t width, uint32_t height)
     {
         glfwSetWindowSize(window_, static_cast<int>(width), static_cast<int>(height));
-        context_->OnWindowResize(width, height);
     }
 
     void Window::SetVSync(bool enabled)

@@ -4,6 +4,7 @@
 #include <flux/core/Ref.h>
 
 #include <flux/renderer/GraphicsContext.h>
+#include <flux/events/Event.h>
 
 #include <string>
 
@@ -51,11 +52,13 @@ namespace flux
         inline Mode GetMode() const { return data_.mode; }
 
         inline GLFWwindow* GetNativePtr() const { return window_; }
-        inline const Ref<GraphicsContext> Context() const { return context_; }
+        inline const Ref<GraphicsContext> Context() const { return data_.context; }
+
+        inline EventDispatcher& Dispatcher() { return data_.dispatcher; }
+        inline const EventDispatcher& Dispatcher() const { return data_.dispatcher; }
 
     private:
         GLFWwindow* window_;
-        Ref<GraphicsContext> context_;
 
         // need to make a struct so that we can toss it to glfw
         struct WindowData
@@ -65,6 +68,8 @@ namespace flux
             uint32_t height = 900;
             Mode mode = Mode::Windowed;
             bool vSync = true;
+            EventDispatcher dispatcher;
+            Ref<GraphicsContext> context;
         };
 
         WindowData data_;

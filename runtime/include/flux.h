@@ -9,6 +9,12 @@
 #include <flux/core/delegate/Delegate.h>
 #include <flux/core/delegate/MutliCastDelegate.h>
 
+#include <flux/events/Event.h>
+#include <flux/events/AppEvent.h>
+#include <flux/events/KeyEvent.h>
+#include <flux/events/MouseEvent.h>
+#include <flux/events/WindowEvent.h>
+
 #include <flux/renderer/Framebuffer.h>
 #include <flux/renderer/GraphicsContext.h>
 #include <flux/renderer/Image.h>

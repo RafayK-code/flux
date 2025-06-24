@@ -358,6 +358,7 @@ namespace flux
         device_->Idle();
         VulkanSwapchainCreateProps props = { width, height, vsync_ };
         Create(props);
+        currentFrameIndex_ = 0;
         device_->Idle();
     }
 

@@ -9,17 +9,17 @@ set(FLUX_PATH_TO_VULKAN_SDK "" CACHE PATH "Path to the Vulkan SDK")
 find_package(Vulkan REQUIRED)
 
 find_path(MONO_INCLUDE_DIR
-  NAMES mono/jit/jit.h
-  PATHS "C:\\Program Files\\Mono\\include"
+    NAMES mono/jit/jit.h
+    PATHS "C:/Program Files/Mono/include/mono-2.0"
 )
 
 find_library(MONO_LIBRARY
-  NAMES mono-2.0-sgen mono-2.0
-  PATHS "C:\\Program Files\\Mono"
+    NAMES mono-2.0-sgen mono-2.0
+    PATHS "C:/Program Files/Mono/lib"
 )
 
 if(MONO_INCLUDE_DIR AND MONO_LIBRARY)
-  message(STATUS "Found Mono: ${MONO_LIBRARY}")
+    message(STATUS "Found Mono: ${MONO_LIBRARY}")
 else()
     message(FATAL_ERROR "Mono not found")
 endif()

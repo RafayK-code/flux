@@ -50,6 +50,13 @@ namespace flux
             WindowResizeEvent e(data->width, data->height);
             data->dispatcher.DispatchEvent(e);
         });
+
+        glfwSetWindowCloseCallback(window_, [](GLFWwindow* window)
+        {
+            WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+            WindowCloseEvent e;
+            data->dispatcher.DispatchEvent(e);
+        });
     }
 
     Window::~Window()

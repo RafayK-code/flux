@@ -4,11 +4,11 @@
 
 namespace flux
 {
-    class AppTickEvent : public EventT<AppTickEvent>
+    class AppUpdateEvent : public EventT<AppUpdateEvent>
     {
     public:
-        AppTickEvent(float dt) : dt_(dt) {}
-        ~AppTickEvent() = default;
+        AppUpdateEvent(float dt) : dt_(dt) {}
+        ~AppUpdateEvent() = default;
 
         inline float GetDt() const { return dt_; }
 

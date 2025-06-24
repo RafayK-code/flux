@@ -59,6 +59,14 @@ set(FLUX_GEN
     "${FLUX_RUNTIME_INC_PATH}/flux.h"
 )
 
+file(GLOB FLUX_SCRIPTING
+    "${FLUX_RUNTIME_SRC_PATH}/flux/scripting/*.h"
+    "${FLUX_RUNTIME_SRC_PATH}/flux/scripting/*.cpp"
+
+    "${FLUX_RUNTIME_INC_PATH}/flux/scripting/*.h"
+    "${FLUX_RUNTIME_INC_PATH}/flux/scripting/*.cpp"
+)
+
 #platform specific (because of the way source group works, we dont need to check if these are actually in sources or not)
 
 file(GLOB FLUX_OPENGL
@@ -85,5 +93,6 @@ source_group("events" FILES ${FLUX_EVENTS})
 source_group("util" FILES ${FLUX_UTIL})
 source_group("window" FILES ${FLUX_WINDOW})
 source_group("renderer" FILES ${FLUX_RENDERER})
+source_group("scripting" FILES ${FLUX_SCRIPTING})
 source_group("platform/opengl" FILES ${FLUX_OPENGL})
 source_group("platform/vulkan" FILES ${FLUX_VULKAN})

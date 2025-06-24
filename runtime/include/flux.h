@@ -3,8 +3,12 @@
 #include <flux/core/base.h>
 #include <flux/core/Ref.h>
 
+#include <flux/core/Application.h>
 #include <flux/core/Logger.h>
 #include <flux/core/LogManager.h>
+
+#include <flux/core/codes/KeyCodes.h>
+#include <flux/core/codes/MouseCodes.h>
 
 #include <flux/core/delegate/Delegate.h>
 #include <flux/core/delegate/MutliCastDelegate.h>

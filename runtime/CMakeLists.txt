@@ -8,6 +8,22 @@ set(FLUX_PATH_TO_VULKAN_SDK "" CACHE PATH "Path to the Vulkan SDK")
 
 find_package(Vulkan REQUIRED)
 
+find_path(MONO_INCLUDE_DIR
+  NAMES mono/jit/jit.h
+  PATHS "C:\\Program Files\\Mono\\include"
+)
+
+find_library(MONO_LIBRARY
+  NAMES mono-2.0-sgen mono-2.0
+  PATHS "C:\\Program Files\\Mono"
+)
+
+if(MONO_INCLUDE_DIR AND MONO_LIBRARY)
+  message(STATUS "Found Mono: ${MONO_LIBRARY}")
+else()
+    message(FATAL_ERROR "Mono not found")
+endif()
+
 add_subdirectory(extern)
 
 set(GLFW_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/glfw)
@@ -93,5 +109,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog)
 target_link_libraries(${PROJECT_NAME} PRIVATE vma)
-target_link_libraries(${PROJECT_NAME} PRIVATE stb)
+target_link_libraries(${PROJECT_NAME} PUBLIC stb)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Vulkan_LIBRARIES})

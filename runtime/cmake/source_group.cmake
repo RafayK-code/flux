@@ -6,12 +6,28 @@ file(GLOB FLUX_CORE
     "${FLUX_RUNTIME_INC_PATH}/flux/core/*.cpp"
 )
 
+file(GLOB FLUX_CORE_CODES
+    "${FLUX_RUNTIME_SRC_PATH}/flux/core/codes/*.h"
+    "${FLUX_RUNTIME_SRC_PATH}/flux/core/codes/*.cpp"
+
+    "${FLUX_RUNTIME_INC_PATH}/flux/core/codes/*.h"
+    "${FLUX_RUNTIME_INC_PATH}/flux/core/codes/*.cpp"
+)
+
 file(GLOB FLUX_CORE_DELEGATE
     "${FLUX_RUNTIME_SRC_PATH}/flux/core/delegate/*.h"
     "${FLUX_RUNTIME_SRC_PATH}/flux/core/delegate/*.cpp"
 
     "${FLUX_RUNTIME_INC_PATH}/flux/core/delegate/*.h"
     "${FLUX_RUNTIME_INC_PATH}/flux/core/delegate/*.cpp"
+)
+
+file(GLOB FLUX_EVENTS
+    "${FLUX_RUNTIME_SRC_PATH}/flux/events/*.h"
+    "${FLUX_RUNTIME_SRC_PATH}/flux/events/*.cpp"
+
+    "${FLUX_RUNTIME_INC_PATH}/flux/events/*.h"
+    "${FLUX_RUNTIME_INC_PATH}/flux/events/*.cpp"
 )
 
 file(GLOB FLUX_UTIL
@@ -64,6 +80,8 @@ file(GLOB FLUX_VULKAN
 source_group("gen" FILES ${FLUX_GEN})
 source_group("core" FILES ${FLUX_CORE})
 source_group("core/delegate" FILES ${FLUX_CORE_DELEGATE})
+source_group("core/codes" FILES ${FLUX_CORE_CODES})
+source_group("events" FILES ${FLUX_EVENTS})
 source_group("util" FILES ${FLUX_UTIL})
 source_group("window" FILES ${FLUX_WINDOW})
 source_group("renderer" FILES ${FLUX_RENDERER})

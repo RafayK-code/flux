@@ -10,3 +10,6 @@
 [submodule "runtime/extern/nlohmann-json"]
 	path = runtime/extern/nlohmann-json
 	url = https://github.com/nlohmann/json.git
+[submodule "runtime/extern/reflect-cpp"]
+	path = runtime/extern/reflect-cpp
+	url = https://github.com/RafayK-code/reflect-cpp.git

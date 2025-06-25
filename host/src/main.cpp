@@ -1,6 +1,7 @@
 #include <fxpch.h>
 
 #include <flux.h>
+#include <flux/core/EntryPoint.h>
 
 class FluxHostApplication : public flux::Application
 {
@@ -33,16 +34,7 @@ private:
 
 };
 
-int main(int argc, char** argv)
+flux::Application* flux::CreateApplication(int argc, char** argv)
 {
-    FluxHostApplication* app = new FluxHostApplication();
-    app->OnInit();
-    while (app->IsRunning())
-    {
-        app->Update();
-    }
-    app->OnShutdown();
-    delete app;
-
-    return 0;
+    return new FluxHostApplication();
 }

@@ -32,6 +32,7 @@ set(SPDLOG_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/spdlog)
 set(VMA_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/vma)
 set(STB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/stb)
 set(GLM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/glm)
+set(REFLECT_CPP_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/reflect-cpp)
 
 set(FLUX_RUNTIME_SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(FLUX_RUNTIME_INC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -41,11 +42,13 @@ set(CMAKE_CXX_STANDARD 20)
 file(GLOB_RECURSE FLUX_RUNTIME_SRC_FILES
     "${FLUX_RUNTIME_SRC_PATH}/flux/*.cpp"
     "${FLUX_RUNTIME_SRC_PATH}/flux/*.h"
+    "${FLUX_RUNTIME_SRC_PATH}/flux/*.hpp"
 )
 
 file(GLOB_RECURSE FLUX_RUNTIME_INC_FILES
     "${FLUX_RUNTIME_INC_PATH}/flux/*.cpp"
     "${FLUX_RUNTIME_INC_PATH}/flux/*.h"
+    "${FLUX_RUNTIME_SRC_PATH}/flux/*.hpp"
 )
 
 # add pch.h to sources
@@ -103,6 +106,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${SPDLOG_PATH}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${VMA_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${STB_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLM_PATH})
+target_include_directories(${PROJECT_NAME} PUBLIC ${REFLECT_CPP_PATH}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${MONO_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${Vulkan_INCLUDE_DIRS})
 
@@ -111,6 +115,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog)
 target_link_libraries(${PROJECT_NAME} PRIVATE vma)
 target_link_libraries(${PROJECT_NAME} PUBLIC stb)
+target_link_libraries(${PROJECT_NAME} PRIVATE reflectcpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Vulkan_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${MONO_LIBRARY})
 

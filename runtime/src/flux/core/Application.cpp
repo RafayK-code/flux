@@ -5,6 +5,8 @@
 #include <flux/events/WindowEvent.h>
 #include <flux/events/AppEvent.h>
 
+#include <flux/util/File.h>
+
 namespace flux
 {
     Application* Application::instance_ = nullptr;
@@ -14,7 +16,13 @@ namespace flux
         instance_ = this;
 
         LogManager::Init("Game");
-        window_ = CreateScope<Window>(WindowProps{ "Hello World", 1280, 720 });
+        project_ = CreateScope<Project>();
+        bool res = project_->LoadProject(BinaryDirectory() / "config.fxproj");
+
+        window_ = CreateScope<Window>(WindowProps{ project_->Config().name,
+            static_cast<uint32_t>(project_->Config().startupWindowSettings.width),
+            static_cast<uint32_t>(project_->Config().startupWindowSettings.height) }
+        );
 
         windowListener_.Listen<WindowCloseEvent>(window_->Dispatcher(), [this](const WindowCloseEvent& e) {
             isRunning_ = false;
@@ -22,6 +30,7 @@ namespace flux
 
         scriptEngine_ = CreateScope<ScriptEngine>();
         scriptEngine_->Init();
+
         isRunning_ = true;
     }
 
@@ -29,6 +38,7 @@ namespace flux
     {
         scriptEngine_.reset();
         window_.reset();
+        project_.reset();
         LogManager::Shutdown();
         instance_ = nullptr;
     }

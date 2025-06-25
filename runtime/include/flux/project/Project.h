@@ -1,0 +1,48 @@
+#pragma once
+
+#include <flux/core/base.h>
+
+#include <string>
+#include <filesystem>
+
+namespace flux
+{
+    struct FLUX_API ProjectConfiguration
+    {
+        std::string name;
+
+        std::string assetDir;
+        std::string scriptModulePath;
+
+        std::string entryPointFile;
+        std::string entryPointNamespace;
+        std::string entryPointClass;
+
+        bool debugMode;
+
+        struct WindowConfiguration
+        {
+            int width;
+            int height;
+            std::string type;
+        };
+
+        WindowConfiguration startupWindowSettings;
+    };
+
+    class FLUX_API Project
+    {
+    public:
+        Project() = default;
+        ~Project() = default;
+
+        bool LoadProject(const std::filesystem::path& projectPath);
+        const ProjectConfiguration& Config() const { return config_; }
+
+        const std::filesystem::path& ProjectRoot() const { return projectPath_; }
+
+    private:
+        ProjectConfiguration config_;
+        std::filesystem::path projectPath_;
+    };
+}

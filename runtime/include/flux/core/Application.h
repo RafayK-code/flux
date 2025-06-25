@@ -5,6 +5,7 @@
 
 #include <flux/window/Window.h>
 #include <flux/scripting/ScriptEngine.h>
+#include <flux/project/Project.h>
 
 namespace flux
 {
@@ -36,6 +37,8 @@ namespace flux
         EventListener windowListener_;
 
         Scope<ScriptEngine> scriptEngine_;
+
+        Scope<Project> project_;
 
         bool isRunning_;
         static Application* instance_;

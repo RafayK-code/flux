@@ -11,19 +11,18 @@ public:
 
     virtual void OnInit() override
     {
-        /*
-        DBG_PRINT("On Init");
+        flux::Project& project = GetProject();
         flux::ScriptEngine& scriptEngine = GetScriptEngine();
-        scriptEngine.LoadAppAssembly("DummyLib.dll");
-        auto obj = scriptEngine.InstantiateApp("Scripts", "TestScript");
-        obj->InvokeMethod("PrintHello");
-        obj->InvokeMethod("Add", 5, 10);
-        obj->InvokeMethod("PrintString", "Hello World!");
-        */
+
+        scriptEngine.LoadAppAssembly(project.ProjectRoot().parent_path() / project.Config().scriptModulePath);
+        mainScript_ = scriptEngine.InstantiateApp(project.Config().entryPointNamespace, project.Config().entryPointClass);
+
+        mainScript_->InvokeMethod("OnInit");
     }
 
     virtual void OnUpdate(float dt) override
     {
+        mainScript_->InvokeMethod("OnUpdate", dt);
     }
 
     virtual void OnShutdown() override
@@ -31,7 +30,7 @@ public:
     }
 
 private:
-
+    flux::Ref<flux::ScriptObject> mainScript_;
 };
 
 flux::Application* flux::CreateApplication(int argc, char** argv)

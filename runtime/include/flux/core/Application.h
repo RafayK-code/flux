@@ -27,6 +27,7 @@ namespace flux
         inline const EventDispatcher& Dispatcher() const { return dispatcher_; }
 
         ScriptEngine& GetScriptEngine() { return *scriptEngine_; }
+        Project& GetProject() { return *project_; }
 
         static Application* Instance() { return instance_; }
 

@@ -113,3 +113,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE vma)
 target_link_libraries(${PROJECT_NAME} PUBLIC stb)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Vulkan_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${MONO_LIBRARY})
+
+set(MONO_DLL "C:/Program Files/Mono/bin/mono-2.0-sgen.dll")
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${MONO_DLL}"
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>"
+    COMMENT "Copying Mono runtime DLL to output directory"
+)

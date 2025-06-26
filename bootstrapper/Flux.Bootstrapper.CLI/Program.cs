@@ -12,6 +12,7 @@ public class Program
     {
         var services = new ServiceCollection()
             .AddSingleton<IProjectService, ProjectService>()
+            .AddSingleton<IBuildService, BuildService>()
             .AddSingleton<IConsole>(PhysicalConsole.Singleton)
             .BuildServiceProvider();
 

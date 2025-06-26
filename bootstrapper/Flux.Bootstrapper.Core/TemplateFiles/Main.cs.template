@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace {{PROJECT_NAME}}
+{
+    public class GameMain
+    {
+        /**
+         * This method is called once at the start of the game
+         */
+        public void OnInit() {}
+
+        /**
+         * This method is called for every frame of the game
+         */
+        public void OnUpdate(float dt) {}
+    }
+}

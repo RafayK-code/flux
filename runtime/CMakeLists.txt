@@ -24,6 +24,7 @@ else()
     message(FATAL_ERROR "Mono not found")
 endif()
 
+set(REFLECTCPP_YAML ON CACHE BOOL "Enable YAML support" FORCE)
 add_subdirectory(extern)
 
 set(GLFW_PATH ${CMAKE_CURRENT_SOURCE_DIR}/extern/glfw)

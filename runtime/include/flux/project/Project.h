@@ -14,7 +14,6 @@ namespace flux
         std::string assetDir;
         std::string scriptModulePath;
 
-        std::string entryPointFile;
         std::string entryPointNamespace;
         std::string entryPointClass;
 
@@ -27,8 +26,17 @@ namespace flux
             std::string type;
         };
 
-        WindowConfiguration startupWindowSettings;
+        WindowConfiguration windowSettings;
+
+        struct RendererConfiguration
+        {
+            std::string api;
+        };
+
+        RendererConfiguration rendererSettings;
     };
+
+
 
     class FLUX_API Project
     {
@@ -36,7 +44,7 @@ namespace flux
         Project() = default;
         ~Project() = default;
 
-        bool LoadProject(const std::filesystem::path& projectPath);
+        bool Load(const std::filesystem::path& projectPath);
         const ProjectConfiguration& Config() const { return config_; }
 
         const std::filesystem::path& ProjectRoot() const { return projectPath_; }
@@ -45,4 +53,6 @@ namespace flux
         ProjectConfiguration config_;
         std::filesystem::path projectPath_;
     };
+
+    std::filesystem::path FindProjectFile(const std::filesystem::path& dir);
 }

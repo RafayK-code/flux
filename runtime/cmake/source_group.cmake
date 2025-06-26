@@ -67,6 +67,14 @@ file(GLOB FLUX_SCRIPTING
     "${FLUX_RUNTIME_INC_PATH}/flux/scripting/*.cpp"
 )
 
+file(GLOB FLUX_PROJECT
+    "${FLUX_RUNTIME_SRC_PATH}/flux/project/*.h"
+    "${FLUX_RUNTIME_SRC_PATH}/flux/project/*.cpp"
+
+    "${FLUX_RUNTIME_INC_PATH}/flux/project/*.h"
+    "${FLUX_RUNTIME_INC_PATH}/flux/project/*.cpp"
+)
+
 #platform specific (because of the way source group works, we dont need to check if these are actually in sources or not)
 
 file(GLOB FLUX_OPENGL

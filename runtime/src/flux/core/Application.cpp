@@ -17,11 +17,11 @@ namespace flux
 
         LogManager::Init("Game");
         project_ = CreateScope<Project>();
-        bool res = project_->LoadProject(BinaryDirectory() / "config.fxproj");
+        bool res = project_->Load(FindProjectFile(BinaryDirectory()));
 
         window_ = CreateScope<Window>(WindowProps{ project_->Config().name,
-            static_cast<uint32_t>(project_->Config().startupWindowSettings.width),
-            static_cast<uint32_t>(project_->Config().startupWindowSettings.height) }
+            static_cast<uint32_t>(project_->Config().windowSettings.width),
+            static_cast<uint32_t>(project_->Config().windowSettings.height) }
         );
 
         windowListener_.Listen<WindowCloseEvent>(window_->Dispatcher(), [this](const WindowCloseEvent& e) {

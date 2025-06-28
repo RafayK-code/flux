@@ -22,6 +22,7 @@ public class ProjectService : IProjectService
 
         Directory.CreateDirectory(Path.Combine(projectPath, assetsDir));
         Directory.CreateDirectory(Path.Combine(projectPath, sourceDir));
+        Directory.CreateDirectory(Path.Combine(projectPath, sourceDir, "Lib"));
 
         string projectPrivateEngineDir = Path.Combine(projectPath, privateEngineDir);
         Directory.CreateDirectory(projectPrivateEngineDir);
@@ -47,7 +48,7 @@ public class ProjectService : IProjectService
         string projectYaml = serializer.Serialize(projectFile);
         File.WriteAllText(Path.Combine(projectPath, $"{name}.fxproj"), projectYaml);
 
-        string assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        string assemblyFolder = AppContext.BaseDirectory;
 
         ProjectUserFile projectUserFile = new ProjectUserFile
         {
@@ -71,6 +72,10 @@ public class ProjectService : IProjectService
 
         string csprojFile = Path.Combine(projectPath, sourceDir, $"{namespaceName}.csproj");
         File.WriteAllText(csprojFile, csprojTemplate);
+
+        File.Copy(Path.Combine(assemblyFolder, "Bin", "Flux.ScriptCore.dll"), Path.Combine(projectPath, sourceDir, "Lib", "Flux.ScriptCore.dll"), true);
+
+        Console.WriteLine("Successfully created new project");
     }
 
     private static bool IsValidNamespaceIdentifier(string name) => Regex.IsMatch(name, @"^([_a-zA-Z][_a-zA-Z0-9]*)(\.[_a-zA-Z][_a-zA-Z0-9]*)*$");

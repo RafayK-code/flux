@@ -1,6 +1,7 @@
 ﻿using Flux.Bootstrapper.Core.Configurations;
 using Flux.Bootstrapper.Core.Utils;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Flux.Bootstrapper.Core;
 
@@ -35,11 +36,41 @@ public class BuildService : IBuildService
             File.SetAttributes(internalBuildDir, attributes | FileAttributes.Hidden);
         }
 
-        //string dotnetArgs = $"build \"{project.ScriptModulePath}\" -c ${buildType} -o {internalBuildDir} -property:BaseIntermediateOutputPath={Path.Combine(internalBuildDir, "obj/")} -p:EnginePath=\"{projectUser.EngineInstallPath}\"";
         string dotnetArgs = $"build \"{project.ScriptModulePath}\" -c {buildType} -o {internalBuildDir} -property:BaseIntermediateOutputPath={Path.Combine(internalBuildDir, "obj/")}";
         ExecuteDotnetCommand(path, dotnetArgs).Wait();
 
         string buildConfigDir = Path.Combine(buildPath, buildType.ToString());
+        if (!Directory.Exists(buildConfigDir))
+        {
+            Directory.CreateDirectory(buildConfigDir);
+        }
+
+        // COPY FILES
+        File.Copy(projectPath, Path.Combine(buildConfigDir, Path.GetFileName(projectPath)), true);
+
+        File.Copy(Path.Combine(internalBuildDir, project.OutputAssembly), Path.Combine(buildConfigDir, project.OutputAssembly), true);
+
+        File.Copy(Path.Combine(internalBuildDir, "Flux.ScriptCore.dll"), Path.Combine(buildConfigDir, "Flux.ScriptCore.dll"), true);
+
+        string exeExt = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
+        File.Copy(Path.Combine(projectUser.EngineInstallPath, "Bin", $"flux-host{exeExt}"), Path.Combine(buildConfigDir, $"{project.Name}{exeExt}"), true);
+
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Process.Start("chmod", $"+x \"{Path.Combine(buildConfigDir, $"{project.Name}{exeExt}")}\"")?.WaitForExit();
+        }
+
+        string sharedLibExt = ".dll";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            sharedLibExt = ".so";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            sharedLibExt = ".dylib";
+        }
+
+        File.Copy(Path.Combine(projectUser.EngineInstallPath, "Bin", $"mono-2.0-sgen{sharedLibExt}"), Path.Combine(buildConfigDir, $"mono-2.0-sgen{sharedLibExt}"), true);
     }
 
     public void Rebuild()
@@ -93,10 +124,9 @@ public class BuildService : IBuildService
         process.BeginErrorReadLine();
 
         await process.WaitForExitAsync();
-#if DEBUG
+
         Console.WriteLine("Output:\n" + output);
         if (!string.IsNullOrEmpty(error))
             Console.WriteLine("Error:\n" + error);
-#endif
     }
 }

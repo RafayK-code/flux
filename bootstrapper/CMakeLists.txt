@@ -5,7 +5,7 @@ set(FLUX_BOOTSTRAPPER_PUBLISH OFF CACHE BOOL "Build bootstrapper as publish")
 
 if(FLUX_BOOTSTRAPPER_PUBLISH)
     set(DOTNET_COMMAND "publish")
-    set(DOTNET_EXTRA_ARGS "--self-contained" "true")
+    set(DOTNET_EXTRA_ARGS "--self-contained" "true" "-p:PublishSingleFile=true")
 else()
     set(DOTNET_COMMAND "build")
     set(DOTNET_EXTRA_ARGS)

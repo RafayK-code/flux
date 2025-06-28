@@ -11,15 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TemplateFiles/Main.cs.template">
+    <Content Include="TemplateFiles\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="TemplateFiles/game.csproj.template">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

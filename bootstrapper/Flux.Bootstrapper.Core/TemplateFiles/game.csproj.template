@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="FluxScriptCore">
-      <HintPath>$(EnginePath)\FluxScriptCore.dll</HintPath>
+    <Reference Include="Flux.ScriptCore">
+      <HintPath>Lib\Flux.ScriptCore.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

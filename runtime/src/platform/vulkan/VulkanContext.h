@@ -46,7 +46,7 @@ namespace flux
         static Ref<VulkanDevice> device_;
         static Ref<VulkanPhysicalDevice> physicalDevice_;
         static VkDebugUtilsMessengerEXT debugUtilsMessenger_;
-        static Scope<VulkanAllocator> allocator_;
+        static Box<VulkanAllocator> allocator_;
 
         VkSurfaceKHR surface_;
         GLFWwindow* windowHandle_;

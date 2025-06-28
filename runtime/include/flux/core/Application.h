@@ -34,12 +34,12 @@ namespace flux
     private:
         EventDispatcher dispatcher_;
 
-        Scope<Window> window_;
+        Box<Window> window_;
         EventListener windowListener_;
 
-        Scope<ScriptEngine> scriptEngine_;
+        Box<ScriptEngine> scriptEngine_;
 
-        Scope<Project> project_;
+        Box<Project> project_;
 
         bool isRunning_;
         static Application* instance_;

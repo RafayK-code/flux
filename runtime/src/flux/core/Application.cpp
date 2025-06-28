@@ -16,10 +16,10 @@ namespace flux
         instance_ = this;
 
         LogManager::Init("Game");
-        project_ = CreateScope<Project>();
+        project_ = CreateBox<Project>();
         bool res = project_->Load(FindProjectFile(BinaryDirectory()));
 
-        window_ = CreateScope<Window>(WindowProps{ project_->Config().name,
+        window_ = CreateBox<Window>(WindowProps{ project_->Config().name,
             static_cast<uint32_t>(project_->Config().windowConfig.width),
             static_cast<uint32_t>(project_->Config().windowConfig.height) }
         );
@@ -28,7 +28,7 @@ namespace flux
             isRunning_ = false;
         });
 
-        scriptEngine_ = CreateScope<ScriptEngine>();
+        scriptEngine_ = CreateBox<ScriptEngine>();
         scriptEngine_->Init();
 
         isRunning_ = true;

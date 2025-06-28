@@ -16,6 +16,12 @@
 
 namespace flux
 {
+    /**
+    * This should be changed in the future. A cleaner approach would have this call something like
+    * platform::BinaryDirectory();
+    * 
+    * Which has a different impl based on the platform
+    */
     inline std::filesystem::path BinaryDirectory()
     {
 #ifdef FLUX_PLATFORM_WINDOWS

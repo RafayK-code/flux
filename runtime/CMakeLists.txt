@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(flux-runtime)
 
-set(FLUX_BUILD_SHARED ON CACHE BOOL "Build engine as shared library")
+set(FLUX_BUILD_SHARED OFF CACHE BOOL "Build engine as shared library")
 set(FLUX_ENABLE_THREADING ON CACHE BOOL "Support multithreading safety within flux")
 set(FLUX_ENABLE_INTRUSIVE_REF OFF CACHE BOOL "Support multithreading safety within flux")
 set(FLUX_PATH_TO_VULKAN_SDK "" CACHE PATH "Path to the Vulkan SDK")
@@ -123,8 +123,10 @@ target_link_libraries(${PROJECT_NAME} PUBLIC ${MONO_LIBRARY})
 set(MONO_DLL "C:/Program Files/Mono/bin/mono-2.0-sgen.dll")
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        "${FLUX_RUNTIME_OUTPUT_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${MONO_DLL}"
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>"
+        "${FLUX_RUNTIME_OUTPUT_DIR}"
     COMMENT "Copying Mono runtime DLL to output directory"
 )

@@ -14,7 +14,7 @@ public:
         flux::Project& project = GetProject();
         flux::ScriptEngine& scriptEngine = GetScriptEngine();
 
-        scriptEngine.LoadAppAssembly(project.ProjectRoot().parent_path() / project.Config().scriptModulePath);
+        scriptEngine.LoadAppAssembly(project.ProjectRoot().parent_path() / project.Config().outputAssembly);
         mainScript_ = scriptEngine.InstantiateApp(project.Config().entryPointNamespace, project.Config().entryPointClass);
 
         mainScript_->InvokeMethod("OnInit");

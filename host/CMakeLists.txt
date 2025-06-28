@@ -13,3 +13,5 @@ add_executable(${PROJECT_NAME} ${GAME_SRC_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${GAME_SRC_PATH})
 target_link_libraries(${PROJECT_NAME} PRIVATE flux-runtime)
+
+add_dependencies(flux-host flux-scriptcore)

@@ -15,6 +15,7 @@ else()
     set(FLUX_RUNTIME_OUTPUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 endif()
 
+add_subdirectory(scriptcore)
 add_subdirectory(runtime)
 add_subdirectory(host)
 add_subdirectory(bootstrapper)

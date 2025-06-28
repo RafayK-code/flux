@@ -11,13 +11,13 @@ namespace flux
     {
         std::string name;
 
-        std::string assetDir;
+        std::string assetLocationPath;
         std::string scriptModulePath;
 
         std::string entryPointNamespace;
         std::string entryPointClass;
 
-        bool debugMode;
+        std::string outputAssembly;
 
         struct WindowConfiguration
         {
@@ -26,14 +26,14 @@ namespace flux
             std::string type;
         };
 
-        WindowConfiguration windowSettings;
+        WindowConfiguration windowConfig;
 
         struct RendererConfiguration
         {
             std::string api;
         };
 
-        RendererConfiguration rendererSettings;
+        RendererConfiguration rendererConfig;
     };
 
 

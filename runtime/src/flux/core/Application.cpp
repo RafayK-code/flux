@@ -20,8 +20,8 @@ namespace flux
         bool res = project_->Load(FindProjectFile(BinaryDirectory()));
 
         window_ = CreateScope<Window>(WindowProps{ project_->Config().name,
-            static_cast<uint32_t>(project_->Config().windowSettings.width),
-            static_cast<uint32_t>(project_->Config().windowSettings.height) }
+            static_cast<uint32_t>(project_->Config().windowConfig.width),
+            static_cast<uint32_t>(project_->Config().windowConfig.height) }
         );
 
         windowListener_.Listen<WindowCloseEvent>(window_->Dispatcher(), [this](const WindowCloseEvent& e) {

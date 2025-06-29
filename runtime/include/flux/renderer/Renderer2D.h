@@ -59,7 +59,7 @@ namespace flux
             glm::vec4 quadVertexPositions[4];
         };
 
-        Scope<BatchData> batchData_;
+        Box<BatchData> batchData_;
 
         const uint32_t maxQuads_;
         const uint32_t maxVertices_;

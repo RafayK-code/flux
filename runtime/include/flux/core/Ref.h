@@ -9,10 +9,10 @@
 namespace flux
 {
     template <typename T>
-    using Scope = std::unique_ptr<T>;
+    using Box = std::unique_ptr<T>;
 
     template <typename T, typename... Args>
-    constexpr Scope<T> CreateScope(Args&&... args)
+    constexpr Box<T> CreateBox(Args&&... args)
     {
         return std::make_unique<T>(std::forward<Args>(args)...);
     }

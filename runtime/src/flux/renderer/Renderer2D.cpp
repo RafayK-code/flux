@@ -8,7 +8,7 @@ namespace flux
         : context_(specification.graphicsContext), maxQuads_(specification.maxQuads), maxVertices_(specification.maxQuads * 4), maxIndices_(specification.maxQuads * 6)
     {
         renderer_ = RendererAPI::Create(context_);
-        batchData_ = CreateScope<BatchData>();
+        batchData_ = CreateBox<BatchData>();
 
         FramebufferSpecification framebufferSpec;
         framebufferSpec.attachments = { {ImageFormat::RGBA}, {ImageFormat::DEPTH24STENCIL8} };

@@ -5,11 +5,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-    
+
   <ItemGroup>
-    <None Update="TemplateFiles/main.cpp.template">
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TemplateFiles\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

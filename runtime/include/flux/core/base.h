@@ -39,4 +39,6 @@ namespace flux
 
     constexpr int FLUX_GL_VERSION_MAJOR = 4;
     constexpr int FLUX_GL_VERSION_MINOR = 1;
+
+    constexpr const char* PROJECT_EXTENSION = ".fxproj";
 }

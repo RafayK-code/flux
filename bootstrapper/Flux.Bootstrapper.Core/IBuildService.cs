@@ -8,7 +8,12 @@ namespace Flux.Bootstrapper.Core;
 
 public interface IBuildService
 {
-    public void Build();
+    public enum BuildType
+    {
+        Debug, Release
+    }
+
+    public void Build(string path, BuildType buildType = BuildType.Release);
     public void Rebuild();
     public void Clean();
     public void Run();

@@ -40,12 +40,12 @@ namespace flux
         return module.Instantiate(namespaceName, className);
     }
 
-    Ref<ScriptObject> ScriptEngine::InstantiateCore(const std::string& namespaceName, const std::string& className)
+    Ref<ScriptObject> ScriptEngine::InstantiateFromCore(const std::string& namespaceName, const std::string& className)
     {
         return coreModule_.Instantiate(namespaceName, className);
     }
 
-    Ref<ScriptObject> ScriptEngine::InstantiateApp(const std::string& namespaceName, const std::string& className)
+    Ref<ScriptObject> ScriptEngine::InstantiateFromApp(const std::string& namespaceName, const std::string& className)
     {
         return appModule_.Instantiate(namespaceName, className);
     }

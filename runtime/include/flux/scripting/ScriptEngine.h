@@ -26,8 +26,8 @@ namespace flux
 
         Ref<ScriptObject> Instantiate(const ScriptModule& module, const std::string& namespaceName, const std::string& className);
 
-        Ref<ScriptObject> InstantiateCore(const std::string& namespaceName, const std::string& className);
-        Ref<ScriptObject> InstantiateApp(const std::string& namespaceName, const std::string& className);
+        Ref<ScriptObject> InstantiateFromCore(const std::string& namespaceName, const std::string& className);
+        Ref<ScriptObject> InstantiateFromApp(const std::string& namespaceName, const std::string& className);
 
     private:
         MonoDomain* domain_ = nullptr;

@@ -36,8 +36,6 @@ namespace flux
         RendererConfiguration rendererConfig;
     };
 
-
-
     class FLUX_API Project
     {
     public:
@@ -45,6 +43,8 @@ namespace flux
         ~Project() = default;
 
         bool Load(const std::filesystem::path& projectPath);
+        void LoadDefault();
+
         const ProjectConfiguration& Config() const { return config_; }
 
         const std::filesystem::path& ProjectRoot() const { return projectPath_; }

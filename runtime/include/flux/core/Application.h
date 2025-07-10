@@ -26,6 +26,7 @@ namespace flux
         inline EventDispatcher& Dispatcher() { return dispatcher_; }
         inline const EventDispatcher& Dispatcher() const { return dispatcher_; }
 
+        Window& GetWindow() { return *window_; }
         ScriptEngine& GetScriptEngine() { return *scriptEngine_; }
         Project& GetProject() { return *project_; }
 

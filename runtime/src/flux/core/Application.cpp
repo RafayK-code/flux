@@ -16,12 +16,18 @@ namespace flux
         instance_ = this;
 
         LogManager::Init("Game");
+
         project_ = CreateBox<Project>();
         bool res = project_->Load(FindProjectFile(BinaryDirectory()));
+        if (!res)
+        {
+            DBG_WARN("No specified .fxproj file found. Using default configuration");
+            project_->LoadDefault();
+        }
 
-        window_ = CreateBox<Window>(WindowProps{ project_->Config().name,
-            static_cast<uint32_t>(project_->Config().windowConfig.width),
-            static_cast<uint32_t>(project_->Config().windowConfig.height) }
+        window_ = CreateBox<Window>(WindowProps{ .title = project_->Config().name,
+            .width = static_cast<uint32_t>(project_->Config().windowConfig.width),
+            .height = static_cast<uint32_t>(project_->Config().windowConfig.height) }
         );
 
         windowListener_.Listen<WindowCloseEvent>(window_->Dispatcher(), [this](const WindowCloseEvent& e) {

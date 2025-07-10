@@ -7,6 +7,21 @@
 
 namespace flux
 {
+    static ProjectConfiguration DefaultProjectConfiguration()
+    {
+        ProjectConfiguration config{};
+        config.name = "Game";
+        config.assetLocationPath = "Assets";
+        config.scriptModulePath = "Scripts";
+        config.entryPointNamespace = "Game";
+        config.entryPointClass = "GameMain";
+
+        config.windowConfig = { 1280, 720, "WINDOWED" };
+        config.rendererConfig = { "VULKAN" };
+
+        return config;
+    }
+
     bool Project::Load(const std::filesystem::path& projectPath)
     {
         std::ifstream file(projectPath);
@@ -21,6 +36,11 @@ namespace flux
         config_ = result.value();
         projectPath_ = projectPath;
         return true;
+    }
+
+    void Project::LoadDefault()
+    {
+        config_ = DefaultProjectConfiguration();
     }
 
     std::filesystem::path FindProjectFile(const std::filesystem::path& dir)

@@ -43,8 +43,8 @@ namespace flux
         virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
         virtual void SubmitCommandBuffer(const Ref<RenderCommandBuffer>& commandBuffer) = 0;
 
-        virtual void BeginRenderPass(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<RenderPass>& renderPass) = 0;
-        virtual void BeginRenderPass(const Ref<RenderCommandBuffer>& commandBuffer, uint32_t frameInFlight, const Ref<RenderPass>& renderPass) = 0;
+        virtual void BeginRenderPass(const Ref<RenderCommandBuffer>& commandBuffer, const Ref<Framebuffer>& framebuffer) = 0;
+        virtual void BeginRenderPass(const Ref<RenderCommandBuffer>& commandBuffer, uint32_t frameInFlight, const Ref<Framebuffer>& framebuffer) = 0;
 
         virtual void EndRenderPass(const Ref<RenderCommandBuffer>& commandBuffer) = 0;
         virtual void EndRenderPass(const Ref<RenderCommandBuffer>& commandBuffer, uint32_t frameInFlight) = 0;

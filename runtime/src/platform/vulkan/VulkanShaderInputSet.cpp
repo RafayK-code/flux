@@ -9,6 +9,7 @@
 namespace flux
 {
     VulkanShaderInputSet::VulkanShaderInputSet(const Ref<Shader>& shader, uint32_t set)
+        : set_(set)
     {
         Ref<VulkanShader> vkShader = std::dynamic_pointer_cast<VulkanShader>(shader);
         VkDescriptorSetLayout shaderLayout = vkShader->DescriptorSetLayout(set);

@@ -12,6 +12,8 @@ namespace flux
 
         virtual ~ShaderInputSet() = default;
 
+        virtual uint32_t SetIndex() const = 0;
+
         virtual void PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding) const = 0;
         virtual void PushUniformBuffer(const Ref<UniformBuffer>& ub, uint32_t binding, uint32_t frameInFlight) const = 0;
 

@@ -43,6 +43,7 @@ namespace flux
         virtual const PipelineSpecification& Specification() const { return specification_; }
 
         virtual Ref<Shader> GetShader() const { return specification_.shader; }
+        virtual Ref<Framebuffer> TargetFramebuffer() const { return specification_.framebuffer; }
 
     protected:
         PipelineSpecification specification_;

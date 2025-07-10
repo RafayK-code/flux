@@ -103,7 +103,7 @@ namespace flux
     {
         renderer_->BeginFrame();
         batchData_->commandBuffer_->Begin();
-        renderer_->BeginRenderPass(batchData_->commandBuffer_, batchData_->quadRenderPass);
+        renderer_->BeginRenderPass(batchData_->commandBuffer_, batchData_->quadRenderPass->GetTargetFramebuffer());
         StartBatch();
     }
 

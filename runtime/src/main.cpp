@@ -3,11 +3,11 @@
 #include <flux.h>
 #include <flux/core/EntryPoint.h>
 
-class FluxHostApplication : public flux::Application
+class FluxRuntimeApplication : public flux::Application
 {
 public:
-    FluxHostApplication() = default;
-    ~FluxHostApplication() = default;
+    FluxRuntimeApplication() = default;
+    ~FluxRuntimeApplication() = default;
 
     virtual void OnInit() override
     {
@@ -35,5 +35,5 @@ private:
 
 flux::Application* flux::CreateApplication(int argc, char** argv)
 {
-    return new FluxHostApplication();
+    return new FluxRuntimeApplication();
 }

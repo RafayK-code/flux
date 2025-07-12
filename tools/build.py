@@ -33,13 +33,13 @@ def start_cmake(libraryType, isDist):
 def build_engine(config):
     print("Building Flux Engine")
     subprocess.run(["cmake", "--build", "build", "--target", 
-                    "flux-runtime", "--config", config], check=True)
+                    "flux", "--config", config], check=True)
     
 
-def build_host(config):
-    print("Building Flux Host")
+def build_runtime(config):
+    print("Building Flux Runtime")
     subprocess.run(["cmake", "--build", "build", "--target", 
-                    "flux-host", "--config", config], check=True)
+                    "flux-runtime", "--config", config], check=True)
     
 
 def build_bootstrapper(config):
@@ -101,7 +101,7 @@ if __name__ == "__main__":
         choices=["static", "shared"],
         required=False,
         default="static",
-        help="Specify what type of library the flux runtime should be built as (static or shared)"
+        help="Specify what type of library the flux engine should be built as (static or shared)"
     )
 
     parser.add_argument(
@@ -111,9 +111,9 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-fh", "--flux-host",
+        "-fr", "--flux-runtime",
         action="store_true",
-        help="Build the flux-host target"
+        help="Build the flux-runtime target"
     )
 
     parser.add_argument(
@@ -127,14 +127,14 @@ if __name__ == "__main__":
     os.chdir(project_root)
 
     if args.dist:
-        args.flux_host = True
+        args.flux_runtime = True
         args.flux_bootstrapper = True
 
     start_cmake(args.library, args.dist)
     build_engine(args.configuration)
 
-    if args.flux_host:
-        build_host(args.configuration)
+    if args.flux_runtime:
+        build_runtime(args.configuration)
 
     if args.flux_bootstrapper:
         build_bootstrapper(args.configuration)

@@ -7,7 +7,7 @@ add_custom_target(${PROJECT_NAME}
     COMMAND ${DOTNET_EXECUTABLE} "build"
         ${CMAKE_CURRENT_SOURCE_DIR}/Flux.ScriptCore.csproj
         -c $<CONFIG>
-        -o ${FLUX_RUNTIME_OUTPUT_DIR}
+        -o ${FLUX_ENGINE_OUTPUT_DIR}
         ${DOTNET_EXTRA_ARGS}
     COMMENT "Building C# ScriptCore"
 )

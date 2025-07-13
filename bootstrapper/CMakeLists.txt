@@ -17,7 +17,7 @@ add_custom_target(${PROJECT_NAME}
     COMMAND ${DOTNET_EXECUTABLE} ${DOTNET_COMMAND}
         ${CMAKE_CURRENT_SOURCE_DIR}/Flux.Bootstrapper.CLI/Flux.Bootstrapper.CLI.csproj
         -c $<CONFIG>
-        -o ${FLUX_RUNTIME_OUTPUT_DIR}
+        -o ${FLUX_ENGINE_OUTPUT_DIR}
         ${DOTNET_EXTRA_ARGS}
     COMMENT "Building C# Bootstrapper (${DOTNET_COMMAND} mode)"
 )

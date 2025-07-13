@@ -31,6 +31,8 @@ namespace flux
 
         virtual void SetData(void* data, size_t size) override;
 
+        virtual void CreatePerLayerImageViews() override;
+
         VkImage NativeVulkanImage() const { return image_; }
         VkImageView NativeVulkanImageView() const { return imageView_; }
         VkSampler NativeVulkanSampler() const { return sampler_; }
@@ -46,6 +48,9 @@ namespace flux
         VkImageView imageView_;
         VkSampler sampler_;
         VmaAllocation allocation_;
+
+        std::vector<VkImageView> perLayerImageViews_;
+        std::map<uint32_t, VkImageView> perMipImageViews_;
 
         VkDescriptorImageInfo descriptorImageInfo_;
     };

@@ -123,6 +123,27 @@ namespace flux
             DBG_ASSERT(result == VK_SUCCESS, "Failed to create sampler");
         }
 
+        if (spec_.usage == ImageUsage::Storage)
+        {
+            Ref<VulkanCommandPool> commandPool = VulkanContext::Device()->CommandPool();
+            VkCommandBuffer commandBuffer = commandPool->AllocateCommandBuffer();
+            commandPool->BeginCommandBuffer(commandBuffer);
+
+            VkImageSubresourceRange subresourceRange{};
+            subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            subresourceRange.baseMipLevel = 0;
+            subresourceRange.levelCount = spec_.mips;
+            subresourceRange.layerCount = spec_.layers;
+
+            InsertImageMemoryBarrier(commandBuffer, image_,
+                0, 0,
+                VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL,
+                VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+                subresourceRange);
+
+            VulkanContext::Device()->FlushCommandBuffer(commandBuffer);
+        }
+
         UpdateDescriptor();
     }
 

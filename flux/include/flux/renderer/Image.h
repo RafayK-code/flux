@@ -99,6 +99,8 @@ namespace flux
         virtual float AspectRatio() const = 0;
 
         virtual void SetData(void* data, size_t size) = 0;
+
+        virtual void CreatePerLayerImageViews() = 0;
     };
 
     bool FormatIsIntegerBased(const ImageFormat format);

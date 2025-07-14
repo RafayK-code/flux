@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(flux)
+project(flux-root)
 
 if(PROJECT_IS_TOP_LEVEL)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -19,3 +19,4 @@ add_subdirectory(scriptcore)
 add_subdirectory(flux)
 add_subdirectory(runtime)
 add_subdirectory(bootstrapper)
+add_subdirectory(demo)
